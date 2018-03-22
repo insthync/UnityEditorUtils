@@ -9,6 +9,11 @@ public class UnityLayer
     {
         get { return layerIndex; }
     }
+    
+    public static implicit operator int(UnityLayer unityLayer)
+    {
+        return unityLayer.LayerIndex;
+    }
 
     public void Set(int _layerIndex)
     {
