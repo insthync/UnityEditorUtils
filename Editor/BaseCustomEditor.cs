@@ -22,35 +22,35 @@ public abstract class BaseCustomEditor : Editor
     /// <summary>
     /// Use this function to set when witch fields should be visible.
     /// </summary>
-    /// <param name='enumFieldName'>
+    /// <param name='conditionFieldName'>
     /// The name of the Enum field. (in your case that is "type")
     /// </param>
-    /// <param name='enumValue'>
+    /// <param name='conditionValue'>
     /// When the Enum value is this in the editor, the field is visible.
     /// </param>
-    /// <param name='fieldName'>
+    /// <param name='showingFieldName'>
     /// The Field name that should only be visible when the chosen enum value is set.
     /// </param>
-    protected void ShowOnEnum(string enumFieldName, string enumValue, string fieldName)
+    protected void ShowOnEnum(string conditionFieldName, string conditionValue, string showingFieldName)
     {
-        FieldCondition newFieldCondition = new FieldCondition()
+        EnumFieldCondition newFieldCondition = new EnumFieldCondition()
         {
-            enumFieldName = enumFieldName,
-            enumValue = enumValue,
-            fieldName = fieldName,
+            conditionFieldName = conditionFieldName,
+            conditionValue = conditionValue,
+            showingFieldName = showingFieldName,
             isValid = true
         };
-        
-        // Valildating the "enumFieldName"
+
+        // Valildating the "conditionFieldName"
         newFieldCondition.errorMsg = "";
-        FieldInfo enumField = target.GetType().GetField(newFieldCondition.enumFieldName);
+        FieldInfo enumField = target.GetType().GetField(newFieldCondition.conditionFieldName);
         if (enumField == null)
         {
             newFieldCondition.isValid = false;
-            newFieldCondition.errorMsg = "Could not find a enum-field named: '" + enumFieldName + "' in '" + target + "'. Make sure you have spelled the field name for the enum correct in the script '" + this.ToString() + "'";
+            newFieldCondition.errorMsg = "Could not find a enum-field named: '" + conditionFieldName + "' in '" + target + "'. Make sure you have spelled the field name for the enum correct in the script '" + ToString() + "'";
         }
 
-        // Valildating the "enumValue"
+        // Valildating the "conditionValue"
         if (newFieldCondition.isValid)
         {
             var currentEnumValue = enumField.GetValue(target);
@@ -59,7 +59,7 @@ public abstract class BaseCustomEditor : Editor
             bool found = false;
             foreach (FieldInfo enumName in enumNames)
             {
-                if (enumName.Name == enumValue)
+                if (enumName.Name == conditionValue)
                 {
                     found = true;
                     break;
@@ -69,18 +69,18 @@ public abstract class BaseCustomEditor : Editor
             if (!found)
             {
                 newFieldCondition.isValid = false;
-                newFieldCondition.errorMsg = "Could not find the enum value: '" + enumValue + "' in the enum '" + currentEnumValue.GetType().ToString() + "'. Make sure you have spelled the value name correct in the script '" + this.ToString() + "'";
+                newFieldCondition.errorMsg = "Could not find the enum value: '" + conditionValue + "' in the enum '" + currentEnumValue.GetType().ToString() + "'. Make sure you have spelled the value name correct in the script '" + ToString() + "'";
             }
         }
 
-        // Valildating the "fieldName"
+        // Valildating the "showingFieldName"
         if (newFieldCondition.isValid)
         {
-            FieldInfo fieldWithCondition = target.GetType().GetField(fieldName);
+            FieldInfo fieldWithCondition = target.GetType().GetField(showingFieldName);
             if (fieldWithCondition == null)
             {
                 newFieldCondition.isValid = false;
-                newFieldCondition.errorMsg = "Could not find the field: '" + fieldName + "' in '" + target + "'. Make sure you have spelled the field name correct in the script '" + this.ToString() + "'";
+                newFieldCondition.errorMsg = "Could not find the field: '" + showingFieldName + "' in '" + target + "'. Make sure you have spelled the field name correct in the script '" + ToString() + "'";
             }
         }
 
@@ -90,13 +90,66 @@ public abstract class BaseCustomEditor : Editor
                     "\n\n" + ToString() + ": " + newFieldCondition.ToString() + "\n";
         }
 
-        fieldConditions.Add(newFieldCondition);
+        enumFieldConditions.Add(newFieldCondition);
+    }
+
+    /// <summary>
+    /// Use this function to set when witch fields should be visible.
+    /// </summary>
+    /// <param name='conditionFieldName'>
+    /// The name of the Bool field.
+    /// </param>
+    /// <param name='conditionValue'>
+    /// When the Bool value is this in the editor, the field is visible.
+    /// </param>
+    /// <param name='showingFieldName'>
+    /// The Field name that should only be visible when the chosen bool value is set.
+    /// </param>
+    protected void ShowOnBool(string conditionFieldName, bool conditionValue, string showingFieldName)
+    {
+        BoolFieldCondition newFieldCondition = new BoolFieldCondition()
+        {
+            conditionFieldName = conditionFieldName,
+            conditionValue = conditionValue,
+            showingFieldName = showingFieldName,
+            isValid = true
+        };
+
+        // Valildating the "conditionFieldName"
+        newFieldCondition.errorMsg = "";
+        FieldInfo boolField = target.GetType().GetField(newFieldCondition.conditionFieldName);
+        if (boolField == null)
+        {
+            newFieldCondition.isValid = false;
+            newFieldCondition.errorMsg = "Could not find a bool-field named: '" + conditionFieldName + "' in '" + target + "'. Make sure you have spelled the field name for the bool correct in the script '" + ToString() + "'";
+        }
+
+        // Valildating the "showingFieldName"
+        if (newFieldCondition.isValid)
+        {
+            FieldInfo fieldWithCondition = target.GetType().GetField(showingFieldName);
+            if (fieldWithCondition == null)
+            {
+                newFieldCondition.isValid = false;
+                newFieldCondition.errorMsg = "Could not find the field: '" + showingFieldName + "' in '" + target + "'. Make sure you have spelled the field name correct in the script '" + ToString() + "'";
+            }
+        }
+
+        if (!newFieldCondition.isValid)
+        {
+            newFieldCondition.errorMsg += "\nYour error is within the Custom Editor Script to show/hide fields in the inspector depending on the an Bool." +
+                    "\n\n" + ToString() + ": " + newFieldCondition.ToString() + "\n";
+        }
+
+        boolFieldConditions.Add(newFieldCondition);
     }
     
-    private List<FieldCondition> fieldConditions;
+    private List<EnumFieldCondition> enumFieldConditions;
+    private List<BoolFieldCondition> boolFieldConditions;
     protected virtual void OnEnable()
     {
-        fieldConditions = new List<FieldCondition>();
+        enumFieldConditions = new List<EnumFieldCondition>();
+        boolFieldConditions = new List<BoolFieldCondition>();
         SetFieldCondition();
     }
 
@@ -113,21 +166,44 @@ public abstract class BaseCustomEditor : Editor
             {
                 bool hasFieldCondition = false;
                 bool shouldBeVisible = false;
-                // Tests if the field is a field that should be hidden/shown due to the enum value
-                foreach (var fieldCondition in fieldConditions)
+                // Enum field conditions
+                foreach (var fieldCondition in enumFieldConditions)
                 {
                     // If the fieldCondition isn't valid, display an error msg.
                     if (!fieldCondition.isValid)
                     {
                         Debug.LogError(fieldCondition.errorMsg);
+                        continue;
                     }
-                    else if (fieldCondition.fieldName == obj.name)
+                    if (fieldCondition.showingFieldName == obj.name)
                     {
                         hasFieldCondition = true;
-                        FieldInfo enumField = target.GetType().GetField(fieldCondition.enumFieldName);
+                        FieldInfo enumField = target.GetType().GetField(fieldCondition.conditionFieldName);
                         var currentEnumValue = enumField.GetValue(target);
                         // If the enum value isn't equal to the wanted value the field will be set not to show
-                        if (currentEnumValue.ToString() == fieldCondition.enumValue)
+                        if (currentEnumValue.ToString() == fieldCondition.conditionValue)
+                        {
+                            shouldBeVisible = true;
+                            break;
+                        }
+                    }
+                }
+                // Bool field conditions
+                foreach (var fieldCondition in boolFieldConditions)
+                {
+                    // If the fieldCondition isn't valid, display an error msg.
+                    if (!fieldCondition.isValid)
+                    {
+                        Debug.LogError(fieldCondition.errorMsg);
+                        continue;
+                    }
+                    if (fieldCondition.showingFieldName == obj.name)
+                    {
+                        hasFieldCondition = true;
+                        FieldInfo boolField = target.GetType().GetField(fieldCondition.conditionFieldName);
+                        var currentBoolValue = (bool)boolField.GetValue(target);
+                        // If the enum value isn't equal to the wanted value the field will be set not to show
+                        if (currentBoolValue == fieldCondition.conditionValue)
                         {
                             shouldBeVisible = true;
                             break;
@@ -145,17 +221,31 @@ public abstract class BaseCustomEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
-    private class FieldCondition
+    private class EnumFieldCondition
     {
-        public string enumFieldName { get; set; }
-        public string enumValue { get; set; }
-        public string fieldName { get; set; }
-        public bool isValid { get; set; }
-        public string errorMsg { get; set; }
+        public string conditionFieldName;
+        public string conditionValue;
+        public string showingFieldName;
+        public bool isValid;
+        public string errorMsg;
         
         public new string ToString()
         {
-            return "'" + enumFieldName + "', '" + enumValue + "', '" + fieldName + "'.";
+            return "'" + conditionFieldName + "', '" + conditionValue + "', '" + showingFieldName + "'.";
+        }
+    }
+
+    private class BoolFieldCondition
+    {
+        public string conditionFieldName;
+        public bool conditionValue;
+        public string showingFieldName;
+        public bool isValid;
+        public string errorMsg;
+
+        public new string ToString()
+        {
+            return "'" + conditionFieldName + "', '" + conditionValue + "', '" + showingFieldName + "'.";
         }
     }
 }
