@@ -68,6 +68,31 @@ public abstract class BaseCustomEditor : Editor
         fieldConditions.Add(newFieldCondition);
     }
 
+    /// <summary>
+    /// Use this function to set when witch fields should be visible.
+    /// </summary>
+    /// <param name='conditionFieldName'>
+    /// The name of the Int field.
+    /// </param>
+    /// <param name='conditionValue'>
+    /// When the Int value is this in the editor, the field is visible.
+    /// </param>
+    /// <param name='showingFieldName'>
+    /// The Field name that should only be visible when the chosen int value is set.
+    /// </param>
+    protected void ShowOnInt(string conditionFieldName, int conditionValue, string showingFieldName)
+    {
+        IntFieldCondition newFieldCondition = new IntFieldCondition()
+        {
+            conditionFieldName = conditionFieldName,
+            conditionValue = conditionValue,
+            showingFieldName = showingFieldName,
+            isValid = true
+        };
+        newFieldCondition.Validate(target, ToString());
+        fieldConditions.Add(newFieldCondition);
+    }
+
     private List<FieldCondition> fieldConditions;
     protected virtual void OnEnable()
     {
@@ -245,6 +270,10 @@ public abstract class BaseCustomEditor : Editor
     }
 
     private class BoolFieldCondition : FieldCondition<bool>
+    {
+    }
+
+    private class IntFieldCondition : FieldCondition<int>
     {
     }
 }

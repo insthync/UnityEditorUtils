@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using UnityEditor;
 #endif
 
-public class BoolShowConditionalAttribute : BaseShowConditionalAttribute
+public class IntShowConditionalAttribute : BaseShowConditionalAttribute
 {
-    public bool conditionValue { get; private set; }
-    public BoolShowConditionalAttribute(string conditionFieldName, bool conditionValue) : base(conditionFieldName)
+    public int conditionValue { get; private set; }
+    public IntShowConditionalAttribute(string conditionFieldName, int conditionValue) : base(conditionFieldName)
     {
         this.conditionValue = conditionValue;
     }
@@ -18,8 +18,8 @@ public class BoolShowConditionalAttribute : BaseShowConditionalAttribute
         bool isShow = false;
         switch (sourcePropertyValue.propertyType)
         {
-            case SerializedPropertyType.Boolean:
-                isShow = sourcePropertyValue.boolValue == conditionValue;
+            case SerializedPropertyType.Integer:
+                isShow = sourcePropertyValue.intValue == conditionValue;
                 break;
         }
         return isShow;
