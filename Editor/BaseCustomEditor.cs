@@ -17,7 +17,7 @@ public abstract class BaseCustomEditor : Editor
     /// ShowOnEnum() - Made by JWolf 13 / 6 - 2012
     /// Edited by Insthync 23 / 4 - 2018
     /////////////////////////////////////////////////////////
-    
+
     /// <summary>
     /// Use this function to set when witch fields should be visible.
     /// </summary>
@@ -67,7 +67,7 @@ public abstract class BaseCustomEditor : Editor
         newFieldCondition.Validate(target, ToString());
         fieldConditions.Add(newFieldCondition);
     }
-    
+
     private List<FieldCondition> fieldConditions;
     protected virtual void OnEnable()
     {
@@ -79,7 +79,7 @@ public abstract class BaseCustomEditor : Editor
     {
         // Update the serializedProperty - always do this in the beginning of OnInspectorGUI.
         serializedObject.Update();
-        
+
         SetPropertyFieldVisibilities(serializedObject.GetIterator());
         // Apply changes to the serializedProperty - always do this in the end of OnInspectorGUI.
         serializedObject.ApplyModifiedProperties();
@@ -146,48 +146,24 @@ public abstract class BaseCustomEditor : Editor
             conditionField = null;
             showingField = null;
 
-            System.Type currentNestLevel;
-            string[] nestedFieldNames;
             // Valildating the "conditionFieldName"
-            currentNestLevel = target.GetType();
-            nestedFieldNames = conditionFieldName.Split('/');
-            for (var i = 0; i < nestedFieldNames.Length; ++i)
+            conditionField = target.GetType().GetField(conditionFieldName);
+            if (conditionField == null)
             {
-                var currentField = currentNestLevel.GetField(nestedFieldNames[i]);
-                if (currentField == null)
-                {
-                    isValid = false;
-                    errorMsg = "Could not find a field named: '" + conditionFieldName + "' in '" + target + "'. Make sure you have spelled the field name for `conditionFieldName` correct in the script '" + scriptName + "'";
-                    return false;
-                }
-                if (i >= nestedFieldNames.Length - 1)
-                {
-                    conditionField = currentField;
-                    break;
-                }
-                currentNestLevel = currentField.FieldType;
+                isValid = false;
+                errorMsg = "Could not find a field named: '" + conditionFieldName + "' in '" + target + "'. Make sure you have spelled the field name for `conditionFieldName` correct in the script '" + scriptName + "'";
+                return false;
             }
 
             // Valildating the "showingFieldName"
             if (isValid)
             {
-                currentNestLevel = target.GetType();
-                nestedFieldNames = showingFieldName.Split('/');
-                for (var i = 0; i < nestedFieldNames.Length; ++i)
+                showingField = target.GetType().GetField(showingFieldName);
+                if (showingField == null)
                 {
-                    var currentField = currentNestLevel.GetField(nestedFieldNames[i]);
-                    if (currentField == null)
-                    {
-                        isValid = false;
-                        errorMsg = "Could not find a field named: '" + showingFieldName + "' in '" + target + "'. Make sure you have spelled the field name for `showingFieldName` correct in the script '" + scriptName + "'";
-                        return false;
-                    }
-                    if (i >= nestedFieldNames.Length - 1)
-                    {
-                        showingField = currentField;
-                        break;
-                    }
-                    currentNestLevel = currentField.FieldType;
+                    isValid = false;
+                    errorMsg = "Could not find a field named: '" + showingFieldName + "' in '" + target + "'. Make sure you have spelled the field name for `showingFieldName` correct in the script '" + scriptName + "'";
+                    return false;
                 }
             }
 
@@ -201,16 +177,12 @@ public abstract class BaseCustomEditor : Editor
 
         public virtual bool IsConditionField(Object target, SerializedProperty obj)
         {
-            string[] nestedFieldNames;
-            nestedFieldNames = conditionFieldName.Split('/');
-            return nestedFieldNames[nestedFieldNames.Length - 1].Equals(obj.name);
+            return conditionFieldName.Equals(obj.name);
         }
 
         public virtual bool IsShowingField(Object target, SerializedProperty obj)
         {
-            string[] nestedFieldNames;
-            nestedFieldNames = showingFieldName.Split('/');
-            return nestedFieldNames[nestedFieldNames.Length - 1].Equals(obj.name);
+            return showingFieldName.Equals(obj.name);
         }
 
         public virtual bool CheckShouldVisible(Object target, SerializedProperty obj)
@@ -231,23 +203,9 @@ public abstract class BaseCustomEditor : Editor
         {
             if (base.CheckShouldVisible(target, obj))
             {
-                var currentNestLevel = target.GetType();
-                object currentNestValue = target;
-                var nestedFieldNames = conditionFieldName.Split('/');
-                for (var i = 0; i < nestedFieldNames.Length; ++i)
-                {
-                    var currentField = currentNestLevel.GetField(nestedFieldNames[i]);
-                    if (currentField == null)
-                        return false;
-                    if (i >= nestedFieldNames.Length - 1)
-                    {
-                        var currentConditionValue = currentField.GetValue(currentNestValue);
-                        // If the `conditionValue` value isn't equal to the wanted value the field will be set not to show
-                        return currentConditionValue.ToString().Equals(conditionValue.ToString());
-                    }
-                    currentNestLevel = currentField.FieldType;
-                    currentNestValue = currentField.GetValue(currentNestValue);
-                }
+                var currentConditionValue = target.GetType().GetField(conditionFieldName).GetValue(target);
+                // If the `conditionValue` value isn't equal to the wanted value the field will be set not to show
+                return currentConditionValue.ToString().Equals(conditionValue.ToString());
             }
             return false;
         }
@@ -262,38 +220,23 @@ public abstract class BaseCustomEditor : Editor
                 // Valildating the "conditionValue"
                 if (isValid)
                 {
-                    var currentNestLevel = target.GetType();
-                    object currentNestValue = target;
-                    var nestedFieldNames = conditionFieldName.Split('/');
-                    for (var i = 0; i < nestedFieldNames.Length; ++i)
+                    var found = false;
+                    var currentConditionValue = conditionField.GetValue(target);
+                    // finding enum value
+                    var enumNames = currentConditionValue.GetType().GetFields();
+                    foreach (FieldInfo enumName in enumNames)
                     {
-                        var currentField = currentNestLevel.GetField(nestedFieldNames[i]);
-                        if (currentField == null)
-                            return false;
-                        if (i >= nestedFieldNames.Length - 1)
+                        if (enumName.Name == conditionValue)
                         {
-                            bool found = false;
-                            var currentConditionValue = currentField.GetValue(currentNestValue);
-                            // finding enum value
-                            var enumNames = currentConditionValue.GetType().GetFields();
-                            foreach (FieldInfo enumName in enumNames)
-                            {
-                                if (enumName.Name == conditionValue)
-                                {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            // If cannot find enum value
-                            if (!found)
-                            {
-                                isValid = false;
-                                errorMsg = "Could not find the enum value: '" + conditionValue + "' in the enum '" + currentConditionValue.GetType().ToString() + "'. Make sure you have spelled the field name for `conditionValue` correct in the script '" + scriptName + "'";
-                            }
+                            found = true;
                             break;
                         }
-                        currentNestLevel = currentField.FieldType;
-                        currentNestValue = currentField.GetValue(currentNestValue);
+                    }
+                    // If cannot find enum value
+                    if (!found)
+                    {
+                        isValid = false;
+                        errorMsg = "Could not find the enum value: '" + conditionValue + "' in the enum '" + currentConditionValue.GetType().ToString() + "'. Make sure you have spelled the field name for `conditionValue` correct in the script '" + scriptName + "'";
                     }
                 }
             }
