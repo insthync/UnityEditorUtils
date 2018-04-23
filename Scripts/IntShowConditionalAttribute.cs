@@ -6,21 +6,36 @@ using UnityEditor;
 
 public class IntShowConditionalAttribute : BaseShowConditionalAttribute
 {
-    public int conditionValue { get; private set; }
+    public int[] conditionValues { get; private set; }
+
     public IntShowConditionalAttribute(string conditionFieldName, int conditionValue) : base(conditionFieldName)
     {
-        this.conditionValue = conditionValue;
+        conditionValues = new int[] { conditionValue };
+    }
+
+    public IntShowConditionalAttribute(string conditionFieldName, int[] conditionValues) : base(conditionFieldName)
+    {
+        this.conditionValues = conditionValues;
     }
 
 #if UNITY_EDITOR
     public override bool GetShowResult(SerializedProperty sourcePropertyValue)
     {
         bool isShow = false;
+        var comparingValue = 0;
         switch (sourcePropertyValue.propertyType)
         {
             case SerializedPropertyType.Integer:
-                isShow = sourcePropertyValue.intValue == conditionValue;
+                comparingValue = sourcePropertyValue.intValue;
                 break;
+        }
+        foreach (var conditionValue in conditionValues)
+        {
+            if (comparingValue == conditionValue)
+            {
+                isShow = true;
+                break;
+            }
         }
         return isShow;
     }

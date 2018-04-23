@@ -6,24 +6,42 @@ using UnityEditor;
 
 public class StringShowConditionalAttribute : BaseShowConditionalAttribute
 {
-    public string conditionValue { get; private set; }
+    public string[] conditionValues { get; private set; }
+
     public StringShowConditionalAttribute(string conditionFieldName, string conditionValue) : base(conditionFieldName)
     {
-        this.conditionValue = conditionValue;
+        conditionValues = new string[] { conditionValue };
+    }
+
+    public StringShowConditionalAttribute(string conditionFieldName, string[] conditionValues) : base(conditionFieldName)
+    {
+        this.conditionValues = conditionValues;
     }
 
 #if UNITY_EDITOR
     public override bool GetShowResult(SerializedProperty sourcePropertyValue)
     {
         bool isShow = false;
+        var comparingValue = "";
         switch (sourcePropertyValue.propertyType)
         {
             case SerializedPropertyType.Enum:
-                isShow = sourcePropertyValue.enumNames[sourcePropertyValue.enumValueIndex].Equals(conditionValue);
+                comparingValue = sourcePropertyValue.enumNames[sourcePropertyValue.enumValueIndex];
                 break;
             case SerializedPropertyType.String:
-                isShow = sourcePropertyValue.stringValue.Equals(conditionValue);
+                comparingValue = sourcePropertyValue.stringValue;
                 break;
+        }
+        if (!string.IsNullOrEmpty(comparingValue))
+        {
+            foreach (var conditionValue in conditionValues)
+            {
+                if (comparingValue.Equals(conditionValue))
+                {
+                    isShow = true;
+                    break;
+                }
+            }
         }
         return isShow;
     }
