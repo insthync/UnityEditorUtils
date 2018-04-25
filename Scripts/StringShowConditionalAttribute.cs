@@ -23,14 +23,17 @@ public class StringShowConditionalAttribute : BaseShowConditionalAttribute
     {
         bool isShow = false;
         var comparingValue = "";
-        switch (sourcePropertyValue.propertyType)
+        if (sourcePropertyValue != null)
         {
-            case SerializedPropertyType.Enum:
-                comparingValue = sourcePropertyValue.enumNames[sourcePropertyValue.enumValueIndex];
-                break;
-            case SerializedPropertyType.String:
-                comparingValue = sourcePropertyValue.stringValue;
-                break;
+            switch (sourcePropertyValue.propertyType)
+            {
+                case SerializedPropertyType.Enum:
+                    comparingValue = sourcePropertyValue.enumNames[sourcePropertyValue.enumValueIndex];
+                    break;
+                case SerializedPropertyType.String:
+                    comparingValue = sourcePropertyValue.stringValue;
+                    break;
+            }
         }
         if (!string.IsNullOrEmpty(comparingValue))
         {

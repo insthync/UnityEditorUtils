@@ -16,11 +16,14 @@ public class BoolShowConditionalAttribute : BaseShowConditionalAttribute
     public override bool GetShowResult(SerializedProperty sourcePropertyValue)
     {
         bool isShow = false;
-        switch (sourcePropertyValue.propertyType)
+        if (sourcePropertyValue != null)
         {
-            case SerializedPropertyType.Boolean:
-                isShow = sourcePropertyValue.boolValue == conditionValue;
-                break;
+            switch (sourcePropertyValue.propertyType)
+            {
+                case SerializedPropertyType.Boolean:
+                    isShow = sourcePropertyValue.boolValue == conditionValue;
+                    break;
+            }
         }
         return isShow;
     }

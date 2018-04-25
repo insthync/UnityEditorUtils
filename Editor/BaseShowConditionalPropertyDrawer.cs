@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(BoolShowConditionalAttribute))]
-public class BaseShowConditionalPropertyDrawer<T> : PropertyDrawer where T : BaseShowConditionalAttribute
+public abstract class BaseShowConditionalPropertyDrawer<T> : PropertyDrawer where T : BaseShowConditionalAttribute
 {
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {

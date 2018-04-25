@@ -23,11 +23,14 @@ public class IntShowConditionalAttribute : BaseShowConditionalAttribute
     {
         bool isShow = false;
         var comparingValue = 0;
-        switch (sourcePropertyValue.propertyType)
+        if (sourcePropertyValue != null)
         {
-            case SerializedPropertyType.Integer:
-                comparingValue = sourcePropertyValue.intValue;
-                break;
+            switch (sourcePropertyValue.propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                    comparingValue = sourcePropertyValue.intValue;
+                    break;
+            }
         }
         foreach (var conditionValue in conditionValues)
         {
