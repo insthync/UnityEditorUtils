@@ -11,6 +11,7 @@ public class UnityScene
     public string SceneName
     {
         get { return sceneName; }
+        set { sceneName = value; }
     }
     
     public static implicit operator string(UnityScene unityScene)
