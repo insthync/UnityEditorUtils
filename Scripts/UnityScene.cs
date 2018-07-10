@@ -4,9 +4,9 @@
 public class UnityScene
 {
     [SerializeField]
-    public Object sceneAsset;
+    private Object sceneAsset;
     [SerializeField]
-    public string sceneName = string.Empty;
+    private string sceneName = string.Empty;
 
     public string SceneName
     {
