@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 [CustomPropertyDrawer(typeof(UnityScene))]
@@ -19,9 +20,37 @@ public class UnityScenePropertyDrawer : PropertyDrawer
             {
                 sceneAsset.objectReferenceValue = value;
                 if (sceneAsset.objectReferenceValue != null)
-                    sceneName.stringValue = (sceneAsset.objectReferenceValue as SceneAsset).name;
+                {
+                    var _sceneName = (sceneAsset.objectReferenceValue as SceneAsset).name;
+                    sceneName.stringValue = _sceneName;
+                    var sceneObj = GetSceneObject(_sceneName);
+                    if (sceneObj == null)
+                    {
+                        Debug.LogWarning("The scene [" + _sceneName + "] cannot be used. To use this scene add it to the build settings for the project");
+                        sceneAsset.objectReferenceValue = null;
+                        sceneName.stringValue = null;
+                    }
+                }
             }
         }
         EditorGUI.EndProperty();
+    }
+
+    protected SceneAsset GetSceneObject(string sceneObjectName)
+    {
+        if (string.IsNullOrEmpty(sceneObjectName))
+        {
+            return null;
+        }
+
+        foreach (var editorScene in EditorBuildSettings.scenes)
+        {
+            var sceneNameWithoutExtension = Path.GetFileNameWithoutExtension(editorScene.path);
+            if (sceneNameWithoutExtension == sceneObjectName)
+            {
+                return AssetDatabase.LoadAssetAtPath(editorScene.path, typeof(SceneAsset)) as SceneAsset;
+            }
+        }
+        return null;
     }
 }
