@@ -31,6 +31,8 @@ public class UnityScenePropertyDrawer : PropertyDrawer
                         sceneName.stringValue = null;
                     }
                 }
+                else
+                    sceneName.stringValue = null;
             }
         }
         EditorGUI.EndProperty();
