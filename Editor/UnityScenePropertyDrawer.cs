@@ -26,9 +26,8 @@ public class UnityScenePropertyDrawer : PropertyDrawer
                     var sceneObj = GetSceneObject(_sceneName);
                     if (sceneObj == null)
                     {
+                        // Just warning, do not change value to null
                         Debug.LogWarning("The scene [" + _sceneName + "] cannot be used. To use this scene add it to the build settings for the project");
-                        sceneAsset.objectReferenceValue = null;
-                        sceneName.stringValue = null;
                     }
                 }
                 else
