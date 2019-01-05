@@ -22,7 +22,7 @@ public class IntShowConditionalAttribute : BaseShowConditionalAttribute
     public override bool GetShowResult(SerializedProperty sourcePropertyValue)
     {
         bool isShow = false;
-        var comparingValue = 0;
+        int comparingValue = 0;
         if (sourcePropertyValue != null)
         {
             switch (sourcePropertyValue.propertyType)
@@ -32,7 +32,7 @@ public class IntShowConditionalAttribute : BaseShowConditionalAttribute
                     break;
             }
         }
-        foreach (var conditionValue in conditionValues)
+        foreach (int conditionValue in conditionValues)
         {
             if (comparingValue == conditionValue)
             {

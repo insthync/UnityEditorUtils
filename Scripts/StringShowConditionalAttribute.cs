@@ -22,7 +22,7 @@ public class StringShowConditionalAttribute : BaseShowConditionalAttribute
     public override bool GetShowResult(SerializedProperty sourcePropertyValue)
     {
         bool isShow = false;
-        var comparingValue = "";
+        string comparingValue = "";
         if (sourcePropertyValue != null)
         {
             switch (sourcePropertyValue.propertyType)
@@ -37,7 +37,7 @@ public class StringShowConditionalAttribute : BaseShowConditionalAttribute
         }
         if (!string.IsNullOrEmpty(comparingValue))
         {
-            foreach (var conditionValue in conditionValues)
+            foreach (string conditionValue in conditionValues)
             {
                 if (comparingValue.Equals(conditionValue))
                 {
