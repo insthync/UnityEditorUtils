@@ -161,18 +161,20 @@ public abstract class BaseCustomEditor : Editor
 
         public bool Validate(Object target, string scriptName = "")
         {
-            FieldInfo conditionField;
+            MemberInfo conditionField;
             FieldInfo showingField;
             return Validate(target, out conditionField, out showingField, scriptName);
         }
 
-        public virtual bool Validate(Object target, out FieldInfo conditionField, out FieldInfo showingField, string scriptName = "")
+        public virtual bool Validate(Object target, out MemberInfo conditionField, out FieldInfo showingField, string scriptName = "")
         {
             conditionField = null;
             showingField = null;
 
             // Valildating the "conditionFieldName"
             conditionField = target.GetType().GetField(conditionFieldName);
+            if (conditionField == null)
+                conditionField = target.GetType().GetProperty(conditionFieldName);
             if (conditionField == null)
             {
                 isValid = false;
@@ -228,7 +230,18 @@ public abstract class BaseCustomEditor : Editor
         {
             if (base.CheckShouldVisible(target, obj))
             {
-                var currentConditionValue = target.GetType().GetField(conditionFieldName).GetValue(target);
+                MemberInfo conditionField = target.GetType().GetField(conditionFieldName);
+                if (conditionField == null)
+                    conditionField = target.GetType().GetProperty(conditionFieldName);
+
+                object currentConditionValue = null;
+
+                if (conditionField is FieldInfo)
+                    currentConditionValue = (conditionField as FieldInfo).GetValue(target);
+
+                if (conditionField is PropertyInfo)
+                    currentConditionValue = (conditionField as PropertyInfo).GetValue(target);
+
                 // If the `conditionValue` value isn't equal to the wanted value the field will be set not to show
                 return currentConditionValue.ToString().Equals(conditionValue.ToString());
             }
@@ -238,25 +251,36 @@ public abstract class BaseCustomEditor : Editor
 
     private class EnumFieldCondition : FieldCondition<string>
     {
-        public override bool Validate(Object target, out FieldInfo conditionField, out FieldInfo showingField, string scriptName = "")
+        public override bool Validate(Object target, out MemberInfo conditionField, out FieldInfo showingField, string scriptName = "")
         {
             if (base.Validate(target, out conditionField, out showingField, scriptName))
             {
                 // Valildating the "conditionValue"
                 if (isValid)
                 {
-                    var found = false;
-                    var currentConditionValue = conditionField.GetValue(target);
-                    // finding enum value
-                    var enumNames = currentConditionValue.GetType().GetFields();
-                    foreach (FieldInfo enumName in enumNames)
+                    bool found = false;
+                    object currentConditionValue = null;
+
+                    if (conditionField is FieldInfo)
+                        currentConditionValue = (conditionField as FieldInfo).GetValue(target);
+
+                    if (conditionField is PropertyInfo)
+                        currentConditionValue = (conditionField as PropertyInfo).GetValue(target);
+
+                    if (currentConditionValue != null)
                     {
-                        if (enumName.Name == conditionValue)
+                        // finding enum value
+                        FieldInfo[] enumNames = currentConditionValue.GetType().GetFields();
+                        foreach (FieldInfo enumName in enumNames)
                         {
-                            found = true;
-                            break;
+                            if (enumName.Name == conditionValue)
+                            {
+                                found = true;
+                                break;
+                            }
                         }
                     }
+
                     // If cannot find enum value
                     if (!found)
                     {
