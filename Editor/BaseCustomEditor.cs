@@ -21,7 +21,7 @@ public abstract class BaseCustomEditor : Editor
     /// <summary>
     /// Use this function to set when witch fields should be visible.
     /// </summary>
-    /// <param name='conditionFieldName'>
+    /// <param name='conditionMemberName'>
     /// The name of the Enum field. (in your case that is "type")
     /// </param>
     /// <param name='conditionValue'>
@@ -30,11 +30,11 @@ public abstract class BaseCustomEditor : Editor
     /// <param name='showingFieldName'>
     /// The Field name that should only be visible when the chosen enum value is set.
     /// </param>
-    protected void ShowOnEnum(string conditionFieldName, string conditionValue, string showingFieldName)
+    protected void ShowOnEnum(string conditionMemberName, string conditionValue, string showingFieldName)
     {
         EnumFieldCondition newFieldCondition = new EnumFieldCondition()
         {
-            conditionFieldName = conditionFieldName,
+            conditionMemberName = conditionMemberName,
             conditionValue = conditionValue,
             showingFieldName = showingFieldName,
             isValid = true
@@ -46,7 +46,7 @@ public abstract class BaseCustomEditor : Editor
     /// <summary>
     /// Use this function to set when witch fields should be visible.
     /// </summary>
-    /// <param name='conditionFieldName'>
+    /// <param name='conditionMemberName'>
     /// The name of the Bool field.
     /// </param>
     /// <param name='conditionValue'>
@@ -55,11 +55,11 @@ public abstract class BaseCustomEditor : Editor
     /// <param name='showingFieldName'>
     /// The Field name that should only be visible when the chosen bool value is set.
     /// </param>
-    protected void ShowOnBool(string conditionFieldName, bool conditionValue, string showingFieldName)
+    protected void ShowOnBool(string conditionMemberName, bool conditionValue, string showingFieldName)
     {
         BoolFieldCondition newFieldCondition = new BoolFieldCondition()
         {
-            conditionFieldName = conditionFieldName,
+            conditionMemberName = conditionMemberName,
             conditionValue = conditionValue,
             showingFieldName = showingFieldName,
             isValid = true
@@ -71,7 +71,7 @@ public abstract class BaseCustomEditor : Editor
     /// <summary>
     /// Use this function to set when witch fields should be visible.
     /// </summary>
-    /// <param name='conditionFieldName'>
+    /// <param name='conditionMemberName'>
     /// The name of the Int field.
     /// </param>
     /// <param name='conditionValue'>
@@ -80,11 +80,11 @@ public abstract class BaseCustomEditor : Editor
     /// <param name='showingFieldName'>
     /// The Field name that should only be visible when the chosen int value is set.
     /// </param>
-    protected void ShowOnInt(string conditionFieldName, int conditionValue, string showingFieldName)
+    protected void ShowOnInt(string conditionMemberName, int conditionValue, string showingFieldName)
     {
         IntFieldCondition newFieldCondition = new IntFieldCondition()
         {
-            conditionFieldName = conditionFieldName,
+            conditionMemberName = conditionMemberName,
             conditionValue = conditionValue,
             showingFieldName = showingFieldName,
             isValid = true
@@ -149,36 +149,36 @@ public abstract class BaseCustomEditor : Editor
 
     private class FieldCondition
     {
-        public string conditionFieldName;
+        public string conditionMemberName;
         public string showingFieldName;
         public bool isValid;
         public string errorMsg;
 
         public new string ToString()
         {
-            return "'" + conditionFieldName + "', '" + showingFieldName + "'.";
+            return "'" + conditionMemberName + "', '" + showingFieldName + "'.";
         }
 
         public bool Validate(Object target, string scriptName = "")
         {
-            MemberInfo conditionField;
+            MemberInfo conditionMember;
             FieldInfo showingField;
-            return Validate(target, out conditionField, out showingField, scriptName);
+            return Validate(target, out conditionMember, out showingField, scriptName);
         }
 
-        public virtual bool Validate(Object target, out MemberInfo conditionField, out FieldInfo showingField, string scriptName = "")
+        public virtual bool Validate(Object target, out MemberInfo conditionMember, out FieldInfo showingField, string scriptName = "")
         {
-            conditionField = null;
+            conditionMember = null;
             showingField = null;
 
-            // Valildating the "conditionFieldName"
-            conditionField = target.GetType().GetField(conditionFieldName);
-            if (conditionField == null)
-                conditionField = target.GetType().GetProperty(conditionFieldName);
-            if (conditionField == null)
+            // Valildating the "conditionMemberName"
+            conditionMember = target.GetType().GetField(conditionMemberName);
+            if (conditionMember == null)
+                conditionMember = target.GetType().GetProperty(conditionMemberName);
+            if (conditionMember == null)
             {
                 isValid = false;
-                errorMsg = "Could not find a field named: '" + conditionFieldName + "' in '" + target + "'. Make sure you have spelled the field name for `conditionFieldName` correct in the script '" + scriptName + "'";
+                errorMsg = "Could not find a field named: '" + conditionMemberName + "' in '" + target + "'. Make sure you have spelled the field name for `conditionMemberName` correct in the script '" + scriptName + "'";
                 return false;
             }
 
@@ -204,7 +204,7 @@ public abstract class BaseCustomEditor : Editor
 
         public virtual bool IsConditionField(Object target, SerializedProperty obj)
         {
-            return conditionFieldName.Equals(obj.name);
+            return conditionMemberName.Equals(obj.name);
         }
 
         public virtual bool IsShowingField(Object target, SerializedProperty obj)
@@ -223,24 +223,24 @@ public abstract class BaseCustomEditor : Editor
         public T conditionValue;
         public new string ToString()
         {
-            return "'" + conditionFieldName + "', '" + conditionValue + "', '" + showingFieldName + "'.";
+            return "'" + conditionMemberName + "', '" + conditionValue + "', '" + showingFieldName + "'.";
         }
 
         public override bool CheckShouldVisible(Object target, SerializedProperty obj)
         {
             if (base.CheckShouldVisible(target, obj))
             {
-                MemberInfo conditionField = target.GetType().GetField(conditionFieldName);
-                if (conditionField == null)
-                    conditionField = target.GetType().GetProperty(conditionFieldName);
+                MemberInfo conditionMember = target.GetType().GetField(conditionMemberName);
+                if (conditionMember == null)
+                    conditionMember = target.GetType().GetProperty(conditionMemberName);
 
                 object currentConditionValue = null;
 
-                if (conditionField is FieldInfo)
-                    currentConditionValue = (conditionField as FieldInfo).GetValue(target);
+                if (conditionMember is FieldInfo)
+                    currentConditionValue = (conditionMember as FieldInfo).GetValue(target);
 
-                if (conditionField is PropertyInfo)
-                    currentConditionValue = (conditionField as PropertyInfo).GetValue(target);
+                if (conditionMember is PropertyInfo)
+                    currentConditionValue = (conditionMember as PropertyInfo).GetValue(target);
 
                 // If the `conditionValue` value isn't equal to the wanted value the field will be set not to show
                 return currentConditionValue.ToString().Equals(conditionValue.ToString());
@@ -251,9 +251,9 @@ public abstract class BaseCustomEditor : Editor
 
     private class EnumFieldCondition : FieldCondition<string>
     {
-        public override bool Validate(Object target, out MemberInfo conditionField, out FieldInfo showingField, string scriptName = "")
+        public override bool Validate(Object target, out MemberInfo conditionMember, out FieldInfo showingField, string scriptName = "")
         {
-            if (base.Validate(target, out conditionField, out showingField, scriptName))
+            if (base.Validate(target, out conditionMember, out showingField, scriptName))
             {
                 // Valildating the "conditionValue"
                 if (isValid)
@@ -261,11 +261,11 @@ public abstract class BaseCustomEditor : Editor
                     bool found = false;
                     object currentConditionValue = null;
 
-                    if (conditionField is FieldInfo)
-                        currentConditionValue = (conditionField as FieldInfo).GetValue(target);
+                    if (conditionMember is FieldInfo)
+                        currentConditionValue = (conditionMember as FieldInfo).GetValue(target);
 
-                    if (conditionField is PropertyInfo)
-                        currentConditionValue = (conditionField as PropertyInfo).GetValue(target);
+                    if (conditionMember is PropertyInfo)
+                        currentConditionValue = (conditionMember as PropertyInfo).GetValue(target);
 
                     if (currentConditionValue != null)
                     {
