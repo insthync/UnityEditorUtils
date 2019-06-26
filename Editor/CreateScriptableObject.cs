@@ -22,13 +22,13 @@ public class CreateScriptableObject : EditorWindow
 
     static List<Type> FindTypes(string name)
     {
-        // get project assembly
-        var asm = Assembly.Load(new AssemblyName(name));
-
-        // filter out all the ScriptableObject types
         var types = new List<Type>();
         try
         {
+            // get project assembly
+            var asm = Assembly.Load(new AssemblyName(name));
+
+            // filter out all the ScriptableObject types
             foreach (Type t in asm.GetTypes())
                 if (t.IsSubclassOf(typeof(ScriptableObject)) && !t.IsAbstract)
                     types.Add(t);
