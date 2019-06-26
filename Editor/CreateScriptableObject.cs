@@ -18,7 +18,7 @@ class EndNameEdit : EndNameEditAction
 
 public class CreateScriptableObject : EditorWindow
 {
-    public string[] assemblyNames = new string[] { "Assembly-CSharp" };
+    public static string[] assemblyNames = new string[] { "Assembly-CSharp" };
 
     static List<Type> FindTypes(string name)
     {
@@ -27,9 +27,13 @@ public class CreateScriptableObject : EditorWindow
 
         // filter out all the ScriptableObject types
         var types = new List<Type>();
-        foreach (Type t in asm.GetTypes())
-            if (t.IsSubclassOf(typeof(ScriptableObject)) && !t.IsAbstract)
-                types.Add(t);
+        try
+        {
+            foreach (Type t in asm.GetTypes())
+                if (t.IsSubclassOf(typeof(ScriptableObject)) && !t.IsAbstract)
+                    types.Add(t);
+        }
+        catch { }
 
         return types;
     }
@@ -56,7 +60,6 @@ public class CreateScriptableObject : EditorWindow
     public static void ShowWindow()
     {
         var win = EditorWindow.GetWindow<CreateScriptableObject>(true, "Create ScriptableObject");
-        win.assemblyNames = new string[] { "Assembly-CSharp" };
         win.ShowPopup();
     }
 }
