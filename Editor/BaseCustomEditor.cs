@@ -240,7 +240,7 @@ public abstract class BaseCustomEditor : Editor
                     currentConditionValue = (conditionMember as FieldInfo).GetValue(target);
 
                 if (conditionMember is PropertyInfo)
-                    currentConditionValue = (conditionMember as PropertyInfo).GetValue(target);
+                    currentConditionValue = (conditionMember as PropertyInfo).GetValue(target, null);
 
                 // If the `conditionValue` value isn't equal to the wanted value the field will be set not to show
                 return currentConditionValue.ToString().Equals(conditionValue.ToString());
@@ -265,7 +265,7 @@ public abstract class BaseCustomEditor : Editor
                         currentConditionValue = (conditionMember as FieldInfo).GetValue(target);
 
                     if (conditionMember is PropertyInfo)
-                        currentConditionValue = (conditionMember as PropertyInfo).GetValue(target);
+                        currentConditionValue = (conditionMember as PropertyInfo).GetValue(target, null);
 
                     if (currentConditionValue != null)
                     {
