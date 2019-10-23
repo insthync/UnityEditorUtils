@@ -57,6 +57,8 @@ public class ArrayElementTitleDrawer : PropertyDrawer
 
     private string GetTitle()
     {
+        if (titleProperty == null)
+            return string.Empty;
         switch (titleProperty.propertyType)
         {
             case SerializedPropertyType.Generic:
