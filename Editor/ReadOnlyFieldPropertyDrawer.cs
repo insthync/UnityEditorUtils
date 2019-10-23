@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CustomPropertyDrawer(typeof(ReadOnlyFieldAttribute))]
-public class ReadOnlyFieldDrawer : PropertyDrawer
+public class ReadOnlyFieldPropertyDrawer : PropertyDrawer
 {
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
