@@ -6,6 +6,7 @@ using System.Reflection;
 
 public abstract class BaseCustomEditor : Editor
 {
+    protected readonly List<string> hiddenFields = new List<string>();
     /// <summary>
     /// Add the ShowOnEnum methods in here
     /// </summary>
@@ -139,7 +140,7 @@ public abstract class BaseCustomEditor : Editor
                     }
                 }
                 // If there are no an conditions for this field, show it
-                if (!hasFieldCondition)
+                if (!hasFieldCondition && !hiddenFields.Contains(obj.name))
                     shouldBeVisible = true;
                 if (shouldBeVisible)
                     EditorGUILayout.PropertyField(obj, true);
