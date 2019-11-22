@@ -38,7 +38,7 @@ public class ArrayElementTitleDrawer : PropertyDrawer
 
         changingColor = isNull ? Attribute.nullColor : Attribute.notNullColor;
         style = SetStyleColor(new GUIStyle(), changingColor);
-        EditorGUI.PropertyField(position, property, new GUIContent(string.Empty, string.Empty), true);
+        EditorGUI.PropertyField(position, property, GUIContent.none, true);
         EditorGUI.LabelField(position, new GUIContent(newlabel, label.tooltip), style);
     }
 
