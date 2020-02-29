@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 
 [System.Serializable]
-public class UnityScene
+public struct UnityScene
 {
     [SerializeField]
     private Object sceneAsset;
     [SerializeField]
-    private string sceneName = string.Empty;
+    private string sceneName;
 
     public string SceneName
     {
