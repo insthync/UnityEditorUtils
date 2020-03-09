@@ -28,10 +28,6 @@ public abstract class BaseShowConditionalPropertyDrawer<T> : PropertyDrawer wher
         var propertyPath = property.propertyPath;
         var conditionPath = propertyPath.Replace(property.name, attribute.conditionFieldName);
         var sourcePropertyValue = property.serializedObject.FindProperty(conditionPath);
-#if UNITY_EDITOR
         return attribute.GetShowResult(sourcePropertyValue);
-#else
-        return false;
-#endif
     }
 }
