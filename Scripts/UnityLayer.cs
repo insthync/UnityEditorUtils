@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 
 [System.Serializable]
-public class UnityLayer
+public struct UnityLayer
 {
     [SerializeField]
-    private int layerIndex = 0;
+    private int layerIndex;
     public int LayerIndex
     {
         get { return layerIndex; }

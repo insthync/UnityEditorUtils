@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 
 [System.Serializable]
-public class UnityTag
+public struct UnityTag
 {
     [SerializeField]
-    private string tag = "";
+    private string tag;
     public string Tag
     {
         get { return tag; }
