@@ -41,6 +41,7 @@ public class ArrayElementTitleAttribute : PropertyAttribute
         this(variableName, new float[] { 1, 0, 0, 1 }, new float[] { 0, 0, 1, 1 }, new float[] { 1, 0, 0, 1 }, new float[] { 0, 1, 0, 1 })
     {
     }
+
     public ArrayElementTitleAttribute(string variableName, float[] nullColorValue, float[] notNullColorValue) :
         this(variableName, nullColorValue, notNullColorValue, nullColorValue, notNullColorValue)
     {
