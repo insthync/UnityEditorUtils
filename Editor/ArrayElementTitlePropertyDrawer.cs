@@ -33,7 +33,10 @@ public class ArrayElementTitleDrawer : PropertyDrawer
         else
         {
             // 0: XXX
-            newlabel = label.text.Split(' ')[1] + ": " + newlabel;
+            if (!string.IsNullOrEmpty(label.text))
+                newlabel = $"{label.text.Split(' ')[1]}: {newlabel}";
+            else
+                newlabel = $"      {newlabel}";
         }
 
         changingColor = isNull ? Attribute.nullColor : Attribute.notNullColor;
