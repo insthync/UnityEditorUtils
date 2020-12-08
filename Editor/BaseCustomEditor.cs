@@ -173,9 +173,9 @@ public abstract class BaseCustomEditor : Editor
             showingField = null;
 
             // Valildating the "conditionMemberName"
-            conditionMember = target.GetType().GetField(conditionMemberName);
+            conditionMember = target.GetType().GetField(conditionMemberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (conditionMember == null)
-                conditionMember = target.GetType().GetProperty(conditionMemberName);
+                conditionMember = target.GetType().GetProperty(conditionMemberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (conditionMember == null)
             {
                 isValid = false;
@@ -186,7 +186,7 @@ public abstract class BaseCustomEditor : Editor
             // Valildating the "showingFieldName"
             if (isValid)
             {
-                showingField = target.GetType().GetField(showingFieldName);
+                showingField = target.GetType().GetField(showingFieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                 if (showingField == null)
                 {
                     isValid = false;
