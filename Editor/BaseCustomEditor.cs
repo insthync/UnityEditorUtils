@@ -13,10 +13,8 @@ public abstract class BaseCustomEditor : Editor
     protected abstract void SetFieldCondition();
 
     /////////////////////////////////////////////////////////
-    /// DO NOT TOUCH THE REST
-    /// If you make changes, it is at your own risk.
-    /// ShowOnEnum() - Made by JWolf 13 / 6 - 2012
-    /// Edited by Insthync 23 / 4 - 2018
+    /// ShowOnEnum() - Made by JWolf
+    /// Modified by Insthync
     /////////////////////////////////////////////////////////
 
     /// <summary>
