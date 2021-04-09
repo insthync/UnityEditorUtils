@@ -53,9 +53,10 @@ public class PreviewSpriteDrawer : PropertyDrawer
         ratio.y = position.height / size.y;
         float minRatio = Mathf.Min(ratio.x, ratio.y);
 
+        Vector2 center = position.center;
         position.width = size.x * minRatio;
         position.height = size.y * minRatio;
-        position.center = new Vector2((position.width * 0.5f) + 5, position.center.y);
+        position.center = center;
 
         GUI.DrawTextureWithTexCoords(position, sprite.texture, coords);
     }
