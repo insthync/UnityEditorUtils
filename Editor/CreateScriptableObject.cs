@@ -20,6 +20,8 @@ public class CreateScriptableObject : EditorWindow
 {
     public static string[] assemblyNames = new string[] { "Assembly-CSharp" };
 
+    Vector2 scrollViewPosition = Vector2.zero;
+
     static List<Type> FindTypes(string name)
     {
         var types = new List<Type>();
@@ -41,6 +43,7 @@ public class CreateScriptableObject : EditorWindow
     void OnGUI()
     {
         GUILayout.Label("Select the type to create:");
+        scrollViewPosition = EditorGUILayout.BeginScrollView(scrollViewPosition, false, true);
         foreach (var assemblyName in assemblyNames)
         {
             foreach (Type t in FindTypes(assemblyName))
@@ -48,18 +51,19 @@ public class CreateScriptableObject : EditorWindow
                 if (GUILayout.Button(t.FullName))
                 {
                     // create the asset, select it, allow renaming, close
-                    var asset = ScriptableObject.CreateInstance(t);
-                    ProjectWindowUtil.StartNameEditingIfProjectWindowExists(asset.GetInstanceID(), ScriptableObject.CreateInstance<EndNameEdit>(), t.FullName + ".asset", AssetPreview.GetMiniThumbnail(asset), null);
+                    var asset = CreateInstance(t);
+                    ProjectWindowUtil.StartNameEditingIfProjectWindowExists(asset.GetInstanceID(), CreateInstance<EndNameEdit>(), t.FullName + ".asset", AssetPreview.GetMiniThumbnail(asset), null);
                     Close();
                 }
             }
         }
+        EditorGUILayout.EndScrollView();
     }
 
     [MenuItem("Assets/Create/ScriptableObject")]
     public static void ShowWindow()
     {
-        var win = EditorWindow.GetWindow<CreateScriptableObject>(true, "Create ScriptableObject");
+        var win = GetWindow<CreateScriptableObject>(true, "Create ScriptableObject");
         win.ShowPopup();
     }
 }
