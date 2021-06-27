@@ -32,8 +32,10 @@ public class CreateScriptableObject : EditorWindow
 
             // filter out all the ScriptableObject types
             foreach (Type t in asm.GetTypes())
+            {
                 if (t.IsSubclassOf(typeof(ScriptableObject)) && !t.IsAbstract)
                     types.Add(t);
+            }
         }
         catch { }
 
@@ -43,7 +45,7 @@ public class CreateScriptableObject : EditorWindow
     void OnGUI()
     {
         GUILayout.Label("Select the type to create:");
-        scrollViewPosition = EditorGUILayout.BeginScrollView(scrollViewPosition, false, true);
+        scrollViewPosition = EditorGUILayout.BeginScrollView(scrollViewPosition, false, false);
         foreach (var assemblyName in assemblyNames)
         {
             foreach (Type t in FindTypes(assemblyName))
