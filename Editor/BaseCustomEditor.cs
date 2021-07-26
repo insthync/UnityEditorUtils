@@ -173,7 +173,7 @@ public abstract class BaseCustomEditor : Editor
             if (conditionMember == null)
             {
                 isValid = false;
-                error = $"Could not find a field named: '{conditionMemberName}' in '{target}'. Make sure you have spelled the field name for `conditionMemberName` correct in the script '{scriptName}'";
+                error = $"Could not find a field named: '{conditionMemberName}' in '{target}'. Make sure you have spelled the field name for `conditionMemberName` correct in the script '{scriptName}', '{ToString()}'";
                 return false;
             }
 
@@ -184,16 +184,12 @@ public abstract class BaseCustomEditor : Editor
                 if (showingField == null)
                 {
                     isValid = false;
-                    error = $"Could not find a field named: '{showingFieldName}' in '{target}'. Make sure you have spelled the field name for `showingFieldName` correct in the script '{scriptName}'";
+                    error = $"Could not find a field named: '{showingFieldName}' in '{target}'. Make sure you have spelled the field name for `showingFieldName` correct in the script '{scriptName}', '{ToString()}'";
                     return false;
                 }
             }
 
-            if (!isValid)
-            {
-                error += "\nYour error is within the Custom Editor Script to show/hide fields in the inspector depending on the an values." +
-                        "\n\n" + scriptName + ": " + ToString() + "\n";
-            }
+            error = string.Empty;
             return true;
         }
 
@@ -290,8 +286,10 @@ public abstract class BaseCustomEditor : Editor
                     if (!found)
                     {
                         isValid = false;
-                        error = $"Could not find the enum value: '{conditionValue}' in the enum '{currentConditionValue.GetType().ToString()}'. Make sure you have spelled the field name for `conditionValue` correct in the script '{scriptName}'";
+                        error = $"Could not find the enum value: '{conditionValue}' in the enum '{currentConditionValue.GetType().ToString()}'. Make sure you have spelled the field name for `conditionValue` correct in the script '{scriptName}', '{ToString()}'";
                     }
+                    error = string.Empty;
+                    return true;
                 }
             }
             return false;
