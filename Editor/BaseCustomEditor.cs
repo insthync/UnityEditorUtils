@@ -13,13 +13,13 @@ public abstract class BaseCustomEditor : Editor
     /////////////////////////////////////////////////////////
 
     /// <summary>
-    /// Dictionary<ShowingFieldName(string), FieldCondition>
+    /// Dictionary<ShowingFieldName(string), List<FieldCondition>>
     /// </summary>
-    private Dictionary<string, FieldCondition> fieldConditions;
+    private Dictionary<string, List<FieldCondition>> fieldConditions;
 
     protected virtual void OnEnable()
     {
-        fieldConditions = new Dictionary<string, FieldCondition>();
+        fieldConditions = new Dictionary<string, List<FieldCondition>>();
         SetFieldCondition();
     }
 
@@ -51,7 +51,7 @@ public abstract class BaseCustomEditor : Editor
             Debug.LogError(newFieldCondition.error);
             return;
         }
-        fieldConditions.Add(showingFieldName, newFieldCondition);
+        AddFieldCondition(showingFieldName, newFieldCondition);
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public abstract class BaseCustomEditor : Editor
             Debug.LogError(newFieldCondition.error);
             return;
         }
-        fieldConditions.Add(showingFieldName, newFieldCondition);
+        AddFieldCondition(showingFieldName, newFieldCondition);
     }
 
     /// <summary>
@@ -97,7 +97,14 @@ public abstract class BaseCustomEditor : Editor
             Debug.LogError(newFieldCondition.error);
             return;
         }
-        fieldConditions.Add(showingFieldName, newFieldCondition);
+        AddFieldCondition(showingFieldName, newFieldCondition);
+    }
+
+    private void AddFieldCondition(string showingFieldName, FieldCondition condition)
+    {
+        if (!fieldConditions.ContainsKey(showingFieldName))
+            fieldConditions.Add(showingFieldName, new List<FieldCondition>());
+        fieldConditions[showingFieldName].Add(condition);
     }
 
     public override void OnInspectorGUI()
@@ -129,26 +136,30 @@ public abstract class BaseCustomEditor : Editor
             // The field is being hidden
             return;
         }
-        if (fieldConditions.ContainsKey(obj.name) && !fieldConditions[obj.name].ShouldVisible(target, obj))
+        if (fieldConditions.ContainsKey(obj.name))
         {
-            // The field should not visible
-            return;
+            foreach (var condition in fieldConditions[obj.name])
+            {
+                if (!condition.ShouldVisible(target, obj))
+                {
+                    // The field should not visible
+                    return;
+                }
+            }
         }
         EditorGUILayout.PropertyField(obj, true);
     }
 
-    private class FieldCondition
+    protected class FieldCondition
     {
         public string conditionMemberName { get; protected set; }
         public string showingFieldName { get; protected set; }
-        public bool isValid { get; protected set; }
         public string error { get; protected set; }
 
         public FieldCondition(string conditionMemberName, string showingFieldName)
         {
             this.conditionMemberName = conditionMemberName;
             this.showingFieldName = showingFieldName;
-            isValid = false;
             error = $"Field condition is not validated yet: '{conditionMemberName}', '{showingFieldName}'";
         }
 
@@ -172,21 +183,16 @@ public abstract class BaseCustomEditor : Editor
                 conditionMember = target.GetType().GetProperty(conditionMemberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (conditionMember == null)
             {
-                isValid = false;
                 error = $"Could not find a field named: '{conditionMemberName}' in '{target}'. Make sure you have spelled the field name for `conditionMemberName` correct in the script '{scriptName}', '{ToString()}'";
                 return false;
             }
 
             // Valildating the "showingFieldName"
-            if (isValid)
+            showingField = target.GetType().GetField(showingFieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (showingField == null)
             {
-                showingField = target.GetType().GetField(showingFieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (showingField == null)
-                {
-                    isValid = false;
-                    error = $"Could not find a field named: '{showingFieldName}' in '{target}'. Make sure you have spelled the field name for `showingFieldName` correct in the script '{scriptName}', '{ToString()}'";
-                    return false;
-                }
+                error = $"Could not find a field named: '{showingFieldName}' in '{target}'. Make sure you have spelled the field name for `showingFieldName` correct in the script '{scriptName}', '{ToString()}'";
+                return false;
             }
 
             error = string.Empty;
@@ -205,18 +211,17 @@ public abstract class BaseCustomEditor : Editor
 
         public virtual bool ShouldVisible(Object target, SerializedProperty obj)
         {
-            return isValid && IsShowingField(target, obj);
+            return IsShowingField(target, obj);
         }
     }
 
-    private class FieldCondition<T> : FieldCondition
+    protected class FieldCondition<T> : FieldCondition
     {
         public T conditionValue { get; protected set; }
 
         public FieldCondition(string conditionMemberName, T conditionValue, string showingFieldName) : base(conditionMemberName, showingFieldName)
         {
             this.conditionValue = conditionValue;
-            isValid = false;
             error = $"Field condition is not validated yet: '{conditionMemberName}', '{conditionValue}', '{showingFieldName}'";
         }
 
@@ -248,60 +253,57 @@ public abstract class BaseCustomEditor : Editor
         }
     }
 
-    private class EnumFieldCondition : FieldCondition<string>
+    protected class EnumFieldCondition : FieldCondition<string>
     {
         public EnumFieldCondition(string conditionMemberName, string conditionValue, string showingFieldName) : base(conditionMemberName, conditionValue, showingFieldName) { }
 
         public override bool Validate(Object target, out MemberInfo conditionMember, out FieldInfo showingField, string scriptName = "")
         {
-            if (base.Validate(target, out conditionMember, out showingField, scriptName))
+            if (!base.Validate(target, out conditionMember, out showingField, scriptName))
+                return false;
+
+            // Valildating the "conditionValue"
+            bool found = false;
+            object currentConditionValue = null;
+
+            if (conditionMember is FieldInfo)
+                currentConditionValue = (conditionMember as FieldInfo).GetValue(target);
+
+            if (conditionMember is PropertyInfo)
+                currentConditionValue = (conditionMember as PropertyInfo).GetValue(target, null);
+
+            if (currentConditionValue != null)
             {
-                // Valildating the "conditionValue"
-                if (isValid)
+                // Finding enum value
+                FieldInfo[] enumNames = currentConditionValue.GetType().GetFields();
+                foreach (FieldInfo enumName in enumNames)
                 {
-                    bool found = false;
-                    object currentConditionValue = null;
-
-                    if (conditionMember is FieldInfo)
-                        currentConditionValue = (conditionMember as FieldInfo).GetValue(target);
-
-                    if (conditionMember is PropertyInfo)
-                        currentConditionValue = (conditionMember as PropertyInfo).GetValue(target, null);
-
-                    if (currentConditionValue != null)
+                    if (enumName.Name == conditionValue)
                     {
-                        // Finding enum value
-                        FieldInfo[] enumNames = currentConditionValue.GetType().GetFields();
-                        foreach (FieldInfo enumName in enumNames)
-                        {
-                            if (enumName.Name == conditionValue)
-                            {
-                                found = true;
-                                break;
-                            }
-                        }
+                        found = true;
+                        break;
                     }
-
-                    // If cannot find enum value
-                    if (!found)
-                    {
-                        isValid = false;
-                        error = $"Could not find the enum value: '{conditionValue}' in the enum '{currentConditionValue.GetType().ToString()}'. Make sure you have spelled the field name for `conditionValue` correct in the script '{scriptName}', '{ToString()}'";
-                    }
-                    error = string.Empty;
-                    return true;
                 }
             }
-            return false;
+
+            // If cannot find enum value
+            if (!found)
+            {
+                error = $"Could not find the enum value: '{conditionValue}' in the enum '{currentConditionValue.GetType().ToString()}'. Make sure you have spelled the field name for `conditionValue` correct in the script '{scriptName}', '{ToString()}'";
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
         }
     }
 
-    private class BoolFieldCondition : FieldCondition<bool>
+    protected class BoolFieldCondition : FieldCondition<bool>
     {
         public BoolFieldCondition(string conditionMemberName, bool conditionValue, string showingFieldName) : base(conditionMemberName, conditionValue, showingFieldName) { }
     }
 
-    private class IntFieldCondition : FieldCondition<int>
+    protected class IntFieldCondition : FieldCondition<int>
     {
         public IntFieldCondition(string conditionMemberName, int conditionValue, string showingFieldName) : base(conditionMemberName, conditionValue, showingFieldName) { }
     }
