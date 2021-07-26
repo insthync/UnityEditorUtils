@@ -1,21 +1,35 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
 public abstract class BaseCustomEditor : Editor
 {
     protected readonly List<string> hiddenFields = new List<string>();
-    /// <summary>
-    /// Add the ShowOnEnum methods in here
-    /// </summary>
-    protected abstract void SetFieldCondition();
 
     /////////////////////////////////////////////////////////
     /// ShowOnEnum() - Made by JWolf
     /// Modified by Insthync
     /////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// Dictionary<ShowingFieldName(string), FieldCondition>
+    /// </summary>
+    private Dictionary<string, FieldCondition> fieldConditions;
+
+    protected virtual void OnEnable()
+    {
+        fieldConditions = new Dictionary<string, FieldCondition>();
+        SetFieldCondition();
+    }
+
+    /// <summary>
+    /// Implement fields condition here
+    /// </summary>
+    protected virtual void SetFieldCondition()
+    {
+
+    }
 
     /// <summary>
     /// Use this function to set when witch fields should be visible.
@@ -31,15 +45,13 @@ public abstract class BaseCustomEditor : Editor
     /// </param>
     protected void ShowOnEnum(string conditionMemberName, string conditionValue, string showingFieldName)
     {
-        EnumFieldCondition newFieldCondition = new EnumFieldCondition()
+        EnumFieldCondition newFieldCondition = new EnumFieldCondition(conditionMemberName, conditionValue, showingFieldName);
+        if (!newFieldCondition.Validate(target, ToString()))
         {
-            conditionMemberName = conditionMemberName,
-            conditionValue = conditionValue,
-            showingFieldName = showingFieldName,
-            isValid = true
-        };
-        newFieldCondition.Validate(target, ToString());
-        fieldConditions.Add(newFieldCondition);
+            Debug.LogError(newFieldCondition.error);
+            return;
+        }
+        fieldConditions.Add(showingFieldName, newFieldCondition);
     }
 
     /// <summary>
@@ -56,15 +68,13 @@ public abstract class BaseCustomEditor : Editor
     /// </param>
     protected void ShowOnBool(string conditionMemberName, bool conditionValue, string showingFieldName)
     {
-        BoolFieldCondition newFieldCondition = new BoolFieldCondition()
+        BoolFieldCondition newFieldCondition = new BoolFieldCondition(conditionMemberName, conditionValue, showingFieldName);
+        if (!newFieldCondition.Validate(target, ToString()))
         {
-            conditionMemberName = conditionMemberName,
-            conditionValue = conditionValue,
-            showingFieldName = showingFieldName,
-            isValid = true
-        };
-        newFieldCondition.Validate(target, ToString());
-        fieldConditions.Add(newFieldCondition);
+            Debug.LogError(newFieldCondition.error);
+            return;
+        }
+        fieldConditions.Add(showingFieldName, newFieldCondition);
     }
 
     /// <summary>
@@ -81,93 +91,79 @@ public abstract class BaseCustomEditor : Editor
     /// </param>
     protected void ShowOnInt(string conditionMemberName, int conditionValue, string showingFieldName)
     {
-        IntFieldCondition newFieldCondition = new IntFieldCondition()
+        IntFieldCondition newFieldCondition = new IntFieldCondition(conditionMemberName, conditionValue, showingFieldName);
+        if (!newFieldCondition.Validate(target, ToString()))
         {
-            conditionMemberName = conditionMemberName,
-            conditionValue = conditionValue,
-            showingFieldName = showingFieldName,
-            isValid = true
-        };
-        newFieldCondition.Validate(target, ToString());
-        fieldConditions.Add(newFieldCondition);
-    }
-
-    private List<FieldCondition> fieldConditions;
-    protected virtual void OnEnable()
-    {
-        fieldConditions = new List<FieldCondition>();
-        SetFieldCondition();
+            Debug.LogError(newFieldCondition.error);
+            return;
+        }
+        fieldConditions.Add(showingFieldName, newFieldCondition);
     }
 
     public override void OnInspectorGUI()
     {
         // Update the serializedProperty - always do this in the beginning of OnInspectorGUI.
         serializedObject.Update();
-
-        SetPropertyFieldVisibilities(serializedObject.GetIterator());
+        // 
+        FieldsLookup(serializedObject.GetIterator());
         // Apply changes to the serializedProperty - always do this in the end of OnInspectorGUI.
         serializedObject.ApplyModifiedProperties();
     }
 
-    private void SetPropertyFieldVisibilities(SerializedProperty obj)
+    protected virtual void FieldsLookup(SerializedProperty obj)
     {
         if (obj.NextVisible(true))
         {
             // Loops through all visiuble fields
             do
             {
-                bool hasFieldCondition = false;
-                bool shouldBeVisible = false;
-                // Enum field conditions
-                foreach (var fieldCondition in fieldConditions)
-                {
-                    // If the fieldCondition isn't valid, display an error msg.
-                    if (!fieldCondition.isValid)
-                    {
-                        Debug.LogError(fieldCondition.errorMsg);
-                        continue;
-                    }
-                    if (fieldCondition.IsShowingField(target, obj))
-                    {
-                        hasFieldCondition = true;
-                        if (fieldCondition.CheckShouldVisible(target, obj))
-                        {
-                            shouldBeVisible = true;
-                            break;
-                        }
-                    }
-                }
-                // If there are no an conditions for this field, show it
-                if (!hasFieldCondition && !hiddenFields.Contains(obj.name))
-                    shouldBeVisible = true;
-                if (shouldBeVisible)
-                    EditorGUILayout.PropertyField(obj, true);
+                RenderField(obj);
             } while (obj.NextVisible(false));
         }
     }
 
+    protected virtual void RenderField(SerializedProperty obj)
+    {
+        if (hiddenFields.Contains(obj.name))
+        {
+            // The field is being hidden
+            return;
+        }
+        if (fieldConditions.ContainsKey(obj.name) && !fieldConditions[obj.name].ShouldVisible(target, obj))
+        {
+            // The field should not visible
+            return;
+        }
+        EditorGUILayout.PropertyField(obj, true);
+    }
+
     private class FieldCondition
     {
-        public string conditionMemberName;
-        public string showingFieldName;
-        public bool isValid;
-        public string errorMsg;
+        public string conditionMemberName { get; protected set; }
+        public string showingFieldName { get; protected set; }
+        public bool isValid { get; protected set; }
+        public string error { get; protected set; }
+
+        public FieldCondition(string conditionMemberName, string showingFieldName)
+        {
+            this.conditionMemberName = conditionMemberName;
+            this.showingFieldName = showingFieldName;
+            isValid = false;
+            error = $"Field condition is not validated yet: '{conditionMemberName}', '{showingFieldName}'";
+        }
 
         public new string ToString()
         {
-            return "'" + conditionMemberName + "', '" + showingFieldName + "'.";
+            return $"'{conditionMemberName}', '{showingFieldName}'.";
         }
 
         public bool Validate(Object target, string scriptName = "")
         {
-            MemberInfo conditionMember;
-            FieldInfo showingField;
-            return Validate(target, out conditionMember, out showingField, scriptName);
+            return Validate(target, out _, out _, scriptName);
         }
 
         public virtual bool Validate(Object target, out MemberInfo conditionMember, out FieldInfo showingField, string scriptName = "")
         {
-            conditionMember = null;
             showingField = null;
 
             // Valildating the "conditionMemberName"
@@ -177,7 +173,7 @@ public abstract class BaseCustomEditor : Editor
             if (conditionMember == null)
             {
                 isValid = false;
-                errorMsg = "Could not find a field named: '" + conditionMemberName + "' in '" + target + "'. Make sure you have spelled the field name for `conditionMemberName` correct in the script '" + scriptName + "'";
+                error = $"Could not find a field named: '{conditionMemberName}' in '{target}'. Make sure you have spelled the field name for `conditionMemberName` correct in the script '{scriptName}'";
                 return false;
             }
 
@@ -188,14 +184,14 @@ public abstract class BaseCustomEditor : Editor
                 if (showingField == null)
                 {
                     isValid = false;
-                    errorMsg = "Could not find a field named: '" + showingFieldName + "' in '" + target + "'. Make sure you have spelled the field name for `showingFieldName` correct in the script '" + scriptName + "'";
+                    error = $"Could not find a field named: '{showingFieldName}' in '{target}'. Make sure you have spelled the field name for `showingFieldName` correct in the script '{scriptName}'";
                     return false;
                 }
             }
 
             if (!isValid)
             {
-                errorMsg += "\nYour error is within the Custom Editor Script to show/hide fields in the inspector depending on the an values." +
+                error += "\nYour error is within the Custom Editor Script to show/hide fields in the inspector depending on the an values." +
                         "\n\n" + scriptName + ": " + ToString() + "\n";
             }
             return true;
@@ -211,7 +207,7 @@ public abstract class BaseCustomEditor : Editor
             return showingFieldName.Equals(obj.name);
         }
 
-        public virtual bool CheckShouldVisible(Object target, SerializedProperty obj)
+        public virtual bool ShouldVisible(Object target, SerializedProperty obj)
         {
             return isValid && IsShowingField(target, obj);
         }
@@ -219,15 +215,23 @@ public abstract class BaseCustomEditor : Editor
 
     private class FieldCondition<T> : FieldCondition
     {
-        public T conditionValue;
-        public new string ToString()
+        public T conditionValue { get; protected set; }
+
+        public FieldCondition(string conditionMemberName, T conditionValue, string showingFieldName) : base(conditionMemberName, showingFieldName)
         {
-            return "'" + conditionMemberName + "', '" + conditionValue + "', '" + showingFieldName + "'.";
+            this.conditionValue = conditionValue;
+            isValid = false;
+            error = $"Field condition is not validated yet: '{conditionMemberName}', '{conditionValue}', '{showingFieldName}'";
         }
 
-        public override bool CheckShouldVisible(Object target, SerializedProperty obj)
+        public new string ToString()
         {
-            if (base.CheckShouldVisible(target, obj))
+            return $"'{conditionMemberName}', '{conditionValue}', '{showingFieldName}'.";
+        }
+
+        public override bool ShouldVisible(Object target, SerializedProperty obj)
+        {
+            if (base.ShouldVisible(target, obj))
             {
                 MemberInfo conditionMember = target.GetType().GetField(conditionMemberName);
                 if (conditionMember == null)
@@ -250,6 +254,8 @@ public abstract class BaseCustomEditor : Editor
 
     private class EnumFieldCondition : FieldCondition<string>
     {
+        public EnumFieldCondition(string conditionMemberName, string conditionValue, string showingFieldName) : base(conditionMemberName, conditionValue, showingFieldName) { }
+
         public override bool Validate(Object target, out MemberInfo conditionMember, out FieldInfo showingField, string scriptName = "")
         {
             if (base.Validate(target, out conditionMember, out showingField, scriptName))
@@ -268,7 +274,7 @@ public abstract class BaseCustomEditor : Editor
 
                     if (currentConditionValue != null)
                     {
-                        // finding enum value
+                        // Finding enum value
                         FieldInfo[] enumNames = currentConditionValue.GetType().GetFields();
                         foreach (FieldInfo enumName in enumNames)
                         {
@@ -284,7 +290,7 @@ public abstract class BaseCustomEditor : Editor
                     if (!found)
                     {
                         isValid = false;
-                        errorMsg = "Could not find the enum value: '" + conditionValue + "' in the enum '" + currentConditionValue.GetType().ToString() + "'. Make sure you have spelled the field name for `conditionValue` correct in the script '" + scriptName + "'";
+                        error = $"Could not find the enum value: '{conditionValue}' in the enum '{currentConditionValue.GetType().ToString()}'. Make sure you have spelled the field name for `conditionValue` correct in the script '{scriptName}'";
                     }
                 }
             }
@@ -294,9 +300,11 @@ public abstract class BaseCustomEditor : Editor
 
     private class BoolFieldCondition : FieldCondition<bool>
     {
+        public BoolFieldCondition(string conditionMemberName, bool conditionValue, string showingFieldName) : base(conditionMemberName, conditionValue, showingFieldName) { }
     }
 
     private class IntFieldCondition : FieldCondition<int>
     {
+        public IntFieldCondition(string conditionMemberName, int conditionValue, string showingFieldName) : base(conditionMemberName, conditionValue, showingFieldName) { }
     }
 }
