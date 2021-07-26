@@ -111,13 +111,13 @@ public abstract class BaseCustomEditor : Editor
     {
         // Update the serializedProperty - always do this in the beginning of OnInspectorGUI.
         serializedObject.Update();
-        // 
-        FieldsLookup(serializedObject.GetIterator());
+        // Lookup field to render
+        RenderFields(serializedObject.GetIterator());
         // Apply changes to the serializedProperty - always do this in the end of OnInspectorGUI.
         serializedObject.ApplyModifiedProperties();
     }
 
-    protected virtual void FieldsLookup(SerializedProperty obj)
+    protected virtual void RenderFields(SerializedProperty obj)
     {
         if (obj.NextVisible(true))
         {
