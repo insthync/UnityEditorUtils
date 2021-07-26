@@ -5,20 +5,24 @@ using System.Reflection;
 
 public abstract class BaseCustomEditor : Editor
 {
-    protected readonly List<string> hiddenFields = new List<string>();
+    /*
+     * ShowOnEnum() - Made by JWolf
+     * Modified by Insthync
+     */
 
-    /////////////////////////////////////////////////////////
-    /// ShowOnEnum() - Made by JWolf
-    /// Modified by Insthync
-    /////////////////////////////////////////////////////////
+    /// <summary>
+    /// Field names in this list will be hidden
+    /// </summary>
+    protected List<string> hiddenFields;
 
     /// <summary>
     /// Dictionary<ShowingFieldName(string), List<FieldCondition>>
     /// </summary>
-    private Dictionary<string, List<FieldCondition>> fieldConditions;
+    protected Dictionary<string, List<FieldCondition>> fieldConditions;
 
     protected virtual void OnEnable()
     {
+        hiddenFields = new List<string>();
         fieldConditions = new Dictionary<string, List<FieldCondition>>();
         SetFieldCondition();
     }
@@ -111,17 +115,18 @@ public abstract class BaseCustomEditor : Editor
     {
         // Update the serializedProperty - always do this in the beginning of OnInspectorGUI.
         serializedObject.Update();
-        // Lookup field to render
-        RenderFields(serializedObject.GetIterator());
+        // Render fields
+        RenderFields();
         // Apply changes to the serializedProperty - always do this in the end of OnInspectorGUI.
         serializedObject.ApplyModifiedProperties();
     }
 
-    protected virtual void RenderFields(SerializedProperty obj)
+    protected virtual void RenderFields()
     {
+        SerializedProperty obj = serializedObject.GetIterator();
         if (obj.NextVisible(true))
         {
-            // Loops through all visiuble fields
+            // Loops through all visible fields
             do
             {
                 RenderField(obj);
@@ -150,11 +155,39 @@ public abstract class BaseCustomEditor : Editor
         EditorGUILayout.PropertyField(obj, true);
     }
 
+    protected static FieldInfo GetField(Object target, string name)
+    {
+        System.Type lookupType = target.GetType();
+        do
+        {
+            FieldInfo field = lookupType.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (field != null)
+                return field;
+            lookupType = lookupType.BaseType;
+        } while (lookupType != typeof(MonoBehaviour));
+        return null;
+    }
+
+    protected static PropertyInfo GetProperty(Object target, string name)
+    {
+        System.Type lookupType = target.GetType();
+        do
+        {
+            PropertyInfo field = lookupType.GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (field != null)
+                return field;
+            lookupType = lookupType.BaseType;
+        } while (lookupType != typeof(MonoBehaviour));
+        return null;
+    }
+
     protected class FieldCondition
     {
         public string ConditionMemberName { get; protected set; }
         public string ShowingFieldName { get; protected set; }
         public string Error { get; protected set; }
+        protected MemberInfo conditionMember;
+        protected FieldInfo showingField;
 
         public FieldCondition(string conditionMemberName, string showingFieldName)
         {
@@ -178,9 +211,9 @@ public abstract class BaseCustomEditor : Editor
             showingField = null;
 
             // Valildating the "conditionMemberName"
-            conditionMember = target.GetType().GetField(ConditionMemberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            conditionMember = GetField(target, ConditionMemberName);
             if (conditionMember == null)
-                conditionMember = target.GetType().GetProperty(ConditionMemberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                conditionMember = GetProperty(target, ConditionMemberName);
             if (conditionMember == null)
             {
                 Error = $"Could not find a field named: '{ConditionMemberName}' in '{target}'. Make sure you have spelled the field name for `conditionMemberName` correct in the script '{scriptName}', '{ToString()}'";
@@ -188,13 +221,15 @@ public abstract class BaseCustomEditor : Editor
             }
 
             // Valildating the "showingFieldName"
-            showingField = target.GetType().GetField(ShowingFieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            showingField = GetField(target, ShowingFieldName);
             if (showingField == null)
             {
                 Error = $"Could not find a field named: '{ShowingFieldName}' in '{target}'. Make sure you have spelled the field name for `showingFieldName` correct in the script '{scriptName}', '{ToString()}'";
                 return false;
             }
 
+            this.conditionMember = conditionMember;
+            this.showingField = showingField;
             Error = string.Empty;
             return true;
         }
@@ -234,10 +269,6 @@ public abstract class BaseCustomEditor : Editor
         {
             if (base.ShouldVisible(target, obj))
             {
-                MemberInfo conditionMember = target.GetType().GetField(ConditionMemberName);
-                if (conditionMember == null)
-                    conditionMember = target.GetType().GetProperty(ConditionMemberName);
-
                 object currentConditionValue = null;
 
                 if (conditionMember is FieldInfo)
