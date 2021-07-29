@@ -57,22 +57,32 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
         categorizedPropertiesValues.Sort();
         foreach (CategoryData categoryData in categorizedPropertiesValues)
         {
-            if (!ShowStates.ContainsKey(categoryData.Name))
-                ShowStates.Add(categoryData.Name, false);
-            ShowStates[categoryData.Name] = EditorGUILayout.BeginFoldoutHeaderGroup(ShowStates[categoryData.Name], categoryData.Name);
-            if (ShowStates[categoryData.Name])
+            List<SerializedProperty> showingProperties = new List<SerializedProperty>();
+            foreach (string propertyPath in categoryData.PropertyPaths)
             {
-                EditorGUI.indentLevel++;
-                EditorGUILayout.BeginVertical();
-                foreach (string propertyPath in categoryData.PropertyPaths)
-                {
-                    RenderField(serializedObject.FindProperty(propertyPath));
-                }
-                EditorGUILayout.Space();
-                EditorGUILayout.EndVertical();
-                EditorGUI.indentLevel--;
+                SerializedProperty property = serializedObject.FindProperty(propertyPath);
+                if (FieldShouldVisible(property))
+                    showingProperties.Add(property);
             }
-            EditorGUILayout.EndFoldoutHeaderGroup();
+            if (showingProperties.Count > 0)
+            {
+                if (!ShowStates.ContainsKey(categoryData.Name))
+                    ShowStates.Add(categoryData.Name, true);
+                ShowStates[categoryData.Name] = EditorGUILayout.BeginFoldoutHeaderGroup(ShowStates[categoryData.Name], categoryData.Name);
+                if (ShowStates[categoryData.Name])
+                {
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.BeginVertical();
+                    foreach (SerializedProperty property in showingProperties)
+                    {
+                        RenderField(property);
+                    }
+                    EditorGUILayout.Space();
+                    EditorGUILayout.EndVertical();
+                    EditorGUI.indentLevel--;
+                }
+                EditorGUILayout.EndFoldoutHeaderGroup();
+            }
         }
     }
 

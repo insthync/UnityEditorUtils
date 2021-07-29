@@ -136,23 +136,33 @@ public abstract class BaseCustomEditor : Editor
 
     protected virtual void RenderField(SerializedProperty obj)
     {
+        if (FieldShouldVisible(obj))
+            EditorGUILayout.PropertyField(obj, true);
+    }
+
+    protected virtual bool FieldShouldVisible(SerializedProperty obj)
+    {
         if (hiddenFields.Contains(obj.name))
         {
             // The field is being hidden
-            return;
+            return false;
         }
         if (fieldConditions.ContainsKey(obj.name))
         {
+            bool shouldVisible = false;
             foreach (var condition in fieldConditions[obj.name])
             {
-                if (!condition.ShouldVisible(target, obj))
+                if (condition.ShouldVisible(target, obj))
                 {
-                    // The field should not visible
-                    return;
+                    // The field should visible
+                    shouldVisible = true;
+                    break;
                 }
             }
+            if (!shouldVisible)
+                return false;
         }
-        EditorGUILayout.PropertyField(obj, true);
+        return true;
     }
 
     protected static FieldInfo GetField(Object target, string name)
