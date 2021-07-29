@@ -9,6 +9,7 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
     public const string UNCATEGORIZED_HEADER = "Uncategorized";
     public const int UNCATEGORIZED_ORDER = -10000;
     protected Dictionary<string, CategoryData> categorizedProperties;
+    protected static readonly Dictionary<string, bool> ShowStates = new Dictionary<string, bool>();
 
     protected override void OnEnable()
     {
@@ -56,9 +57,12 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
         categorizedPropertiesValues.Sort();
         foreach (CategoryData categoryData in categorizedPropertiesValues)
         {
-            categoryData.Show = EditorGUILayout.BeginFoldoutHeaderGroup(categoryData.Show, categoryData.Name);
-            if (categoryData.Show)
+            if (!ShowStates.ContainsKey(categoryData.Name))
+                ShowStates.Add(categoryData.Name, false);
+            ShowStates[categoryData.Name] = EditorGUILayout.BeginFoldoutHeaderGroup(ShowStates[categoryData.Name], categoryData.Name);
+            if (ShowStates[categoryData.Name])
             {
+                EditorGUI.indentLevel++;
                 EditorGUILayout.BeginVertical();
                 foreach (string propertyPath in categoryData.PropertyPaths)
                 {
@@ -66,6 +70,7 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
                 }
                 EditorGUILayout.Space();
                 EditorGUILayout.EndVertical();
+                EditorGUI.indentLevel--;
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
         }
@@ -116,7 +121,6 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
         public string Name { get; private set; }
         public int Order { get; set; }
         public List<string> PropertyPaths { get; private set; } = new List<string>();
-        public bool Show { get; set; }
 
         public CategoryData(string name, int order)
         {
