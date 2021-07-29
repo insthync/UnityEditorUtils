@@ -9,7 +9,12 @@ public struct UnityLayer
     {
         get { return layerIndex; }
     }
-    
+
+    public UnityLayer(int layerIndex)
+    {
+        this.layerIndex = layerIndex;
+    }
+
     public static implicit operator int(UnityLayer unityLayer)
     {
         return unityLayer.LayerIndex;

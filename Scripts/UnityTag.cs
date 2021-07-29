@@ -9,6 +9,11 @@ public struct UnityTag
     {
         get { return tag; }
     }
+
+    public UnityTag(string tag)
+    {
+        this.tag = tag;
+    }
     
     public static implicit operator string(UnityTag unityTag)
     {
