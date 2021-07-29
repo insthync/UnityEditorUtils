@@ -107,7 +107,7 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
                 return attributes.Length > 0 ? attributes[0] : null;
             }
             lookupType = lookupType.BaseType;
-        } while (lookupType != typeof(MonoBehaviour));
+        } while (lookupType != typeof(UnityEngine.Object));
         return null;
     }
 
