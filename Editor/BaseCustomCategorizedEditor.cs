@@ -68,7 +68,7 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
             {
                 if (!ShowStates.ContainsKey(categoryData.Name))
                     ShowStates.Add(categoryData.Name, true);
-                ShowStates[categoryData.Name] = EditorGUILayout.BeginFoldoutHeaderGroup(ShowStates[categoryData.Name], categoryData.Name);
+                ShowStates[categoryData.Name] = EditorGUILayout.Foldout(ShowStates[categoryData.Name], categoryData.Name);
                 if (ShowStates[categoryData.Name])
                 {
                     EditorGUI.indentLevel++;
@@ -81,7 +81,6 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
                     EditorGUILayout.EndVertical();
                     EditorGUI.indentLevel--;
                 }
-                EditorGUILayout.EndFoldoutHeaderGroup();
             }
         }
     }
