@@ -32,18 +32,18 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
                 {
                     // Uncategorized
                     lastHeader = UNCATEGORIZED_HEADER;
-                    tempCategoryData = CreateOrGetCategoryData(categorizedProperties, lastHeader, UNCATEGORIZED_ORDER);
+                    tempCategoryData = CreateOrGetCategoryData(categorizedProperties, lastHeader, UNCATEGORIZED_ORDER, false);
                 }
                 else if (category != null)
                 {
                     // Categorized by header
                     lastHeader = category.category;
-                    tempCategoryData = CreateOrGetCategoryData(categorizedProperties, lastHeader, category.order);
+                    tempCategoryData = CreateOrGetCategoryData(categorizedProperties, lastHeader, category.order, category.isFoldoutByDefault);
                 }
                 else
                 {
                     // Get category data by previous header
-                    tempCategoryData = CreateOrGetCategoryData(categorizedProperties, lastHeader, 0);
+                    tempCategoryData = CreateOrGetCategoryData(categorizedProperties, lastHeader, 0, false);
                 }
                 tempCategoryData.PropertyPaths.Add(obj.propertyPath);
             } while (obj.NextVisible(false));
@@ -67,7 +67,7 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
             if (showingProperties.Count > 0)
             {
                 if (!ShowStates.ContainsKey(categoryData.Name))
-                    ShowStates.Add(categoryData.Name, true);
+                    ShowStates.Add(categoryData.Name, categoryData.IsFoldoutByDefault);
                 ShowStates[categoryData.Name] = EditorGUILayout.Foldout(ShowStates[categoryData.Name], categoryData.Name);
                 if (ShowStates[categoryData.Name])
                 {
@@ -85,12 +85,12 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
         }
     }
 
-    protected CategoryData CreateOrGetCategoryData(Dictionary<string, CategoryData> categorizedProperties, string category, int order)
+    protected CategoryData CreateOrGetCategoryData(Dictionary<string, CategoryData> categorizedProperties, string category, int order, bool isFoldoutByDefault)
     {
         CategoryData tempCategoryData;
         if (!categorizedProperties.ContainsKey(category))
         {
-            tempCategoryData = new CategoryData(category, order);
+            tempCategoryData = new CategoryData(category, order, isFoldoutByDefault);
             categorizedProperties.Add(category, tempCategoryData);
         }
         else
@@ -129,12 +129,14 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
     {
         public string Name { get; private set; }
         public int Order { get; set; }
+        public bool IsFoldoutByDefault { get; private set; }
         public List<string> PropertyPaths { get; private set; } = new List<string>();
 
-        public CategoryData(string name, int order)
+        public CategoryData(string name, int order, bool isFoldoutByDefault)
         {
             Name = name;
             Order = order;
+            IsFoldoutByDefault = isFoldoutByDefault;
         }
 
         public override int GetHashCode()
