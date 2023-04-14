@@ -17,7 +17,7 @@ public class InspectorButtonPropertyDrawer : PropertyDrawer
         if (GUI.Button(buttonRect, label.text))
         {
             Type eventOwnerType = prop.serializedObject.targetObject.GetType();
-            string eventName = inspectorButtonAttribute.MethodName;
+            string eventName = inspectorButtonAttribute.methodName;
 
             do
             {

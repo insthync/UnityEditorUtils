@@ -11,10 +11,10 @@ using UnityEngine;
 [System.AttributeUsage(System.AttributeTargets.Field)]
 public class InspectorButtonAttribute : PropertyAttribute
 {
-    public readonly string MethodName;
+    public readonly string methodName;
 
-    public InspectorButtonAttribute(string MethodName)
+    public InspectorButtonAttribute(string methodName)
     {
-        this.MethodName = MethodName;
+        this.methodName = methodName;
     }
 }
