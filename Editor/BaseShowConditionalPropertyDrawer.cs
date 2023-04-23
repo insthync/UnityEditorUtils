@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 public abstract class BaseShowConditionalPropertyDrawer<T> : PropertyDrawer where T : BaseShowConditionalAttribute
