@@ -144,6 +144,11 @@ public class BaseCustomCategorizedEditor : BaseCustomEditor
             return Name.GetHashCode();
         }
 
+        public override bool Equals(object obj)
+        {
+            return GetHashCode() == obj.GetHashCode();
+        }
+
         public override string ToString()
         {
             return Name;
