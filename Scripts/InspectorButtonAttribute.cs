@@ -12,9 +12,11 @@ using UnityEngine;
 public class InspectorButtonAttribute : PropertyAttribute
 {
     public readonly string methodName;
+    public readonly string labelText;
 
-    public InspectorButtonAttribute(string methodName)
+    public InspectorButtonAttribute(string methodName, string labelText = "")
     {
         this.methodName = methodName;
+        this.labelText = labelText;
     }
 }
