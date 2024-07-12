@@ -18,23 +18,23 @@ class EndNameEdit : EndNameEditAction
 
 public class CreateScriptableObject : EditorWindow
 {
-    public static string[] assemblyNames = new string[] { "Assembly-CSharp" };
+    public static readonly HashSet<string> assemblyNames = new HashSet<string>() { "Assembly-CSharp" };
 
-    Vector2 scrollViewPosition = Vector2.zero;
+    Vector2 _scrollViewPosition = Vector2.zero;
 
     static List<Type> FindTypes(string name)
     {
-        var types = new List<Type>();
+        List<Type> types = new List<Type>();
         try
         {
             // get project assembly
-            var asm = Assembly.Load(new AssemblyName(name));
+            Assembly asm = Assembly.Load(new AssemblyName(name));
 
             // filter out all the ScriptableObject types
-            foreach (Type t in asm.GetTypes())
+            foreach (Type type in asm.GetTypes())
             {
-                if (t.IsSubclassOf(typeof(ScriptableObject)) && !t.IsAbstract)
-                    types.Add(t);
+                if (type.IsSubclassOf(typeof(ScriptableObject)) && !type.IsAbstract)
+                    types.Add(type);
             }
         }
         catch { }
@@ -45,16 +45,16 @@ public class CreateScriptableObject : EditorWindow
     void OnGUI()
     {
         GUILayout.Label("Select the type to create:");
-        scrollViewPosition = EditorGUILayout.BeginScrollView(scrollViewPosition, false, false);
-        foreach (var assemblyName in assemblyNames)
+        _scrollViewPosition = EditorGUILayout.BeginScrollView(_scrollViewPosition, false, false);
+        foreach (string assemblyName in assemblyNames)
         {
-            foreach (Type t in FindTypes(assemblyName))
+            foreach (Type type in FindTypes(assemblyName))
             {
-                if (GUILayout.Button(t.FullName))
+                if (GUILayout.Button(type.FullName))
                 {
                     // create the asset, select it, allow renaming, close
-                    var asset = CreateInstance(t);
-                    ProjectWindowUtil.StartNameEditingIfProjectWindowExists(asset.GetInstanceID(), CreateInstance<EndNameEdit>(), t.FullName + ".asset", AssetPreview.GetMiniThumbnail(asset), null);
+                    ScriptableObject asset = CreateInstance(type);
+                    ProjectWindowUtil.StartNameEditingIfProjectWindowExists(asset.GetInstanceID(), CreateInstance<EndNameEdit>(), type.FullName + ".asset", AssetPreview.GetMiniThumbnail(asset), null);
                     Close();
                 }
             }
@@ -65,7 +65,6 @@ public class CreateScriptableObject : EditorWindow
     [MenuItem("Assets/Create/ScriptableObject")]
     public static void ShowWindow()
     {
-        var win = GetWindow<CreateScriptableObject>(true, "Create ScriptableObject");
-        win.ShowPopup();
+        GetWindow<CreateScriptableObject>(true, "Create ScriptableObject").ShowPopup();
     }
 }
