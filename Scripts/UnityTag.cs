@@ -20,8 +20,8 @@ public struct UnityTag
         return unityTag.Tag;
     }
 
-    public void Set(string _tag)
+    public void Set(string tag)
     {
-        tag = _tag;
+        this.tag = tag;
     }
 }

@@ -20,10 +20,10 @@ public struct UnityLayer
         return unityLayer.LayerIndex;
     }
 
-    public void Set(int _layerIndex)
+    public void Set(int layerIndex)
     {
-        if (_layerIndex > 0 && _layerIndex < 32)
-            layerIndex = _layerIndex;
+        if (layerIndex > 0 && layerIndex < 32)
+            this.layerIndex = layerIndex;
     }
 
     public int Mask
