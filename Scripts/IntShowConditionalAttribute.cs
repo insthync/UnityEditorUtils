@@ -1,46 +1,47 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-public class IntShowConditionalAttribute : BaseShowConditionalAttribute
+namespace Insthync.UnityEditorUtils
 {
-    public int[] conditionValues { get; private set; }
-
-    public IntShowConditionalAttribute(string conditionFieldName, int conditionValue) : base(conditionFieldName)
+    public class IntShowConditionalAttribute : BaseShowConditionalAttribute
     {
-        conditionValues = new int[] { conditionValue };
-    }
+        public int[] conditionValues { get; private set; }
 
-    public IntShowConditionalAttribute(string conditionFieldName, int[] conditionValues) : base(conditionFieldName)
-    {
-        this.conditionValues = conditionValues;
-    }
+        public IntShowConditionalAttribute(string conditionFieldName, int conditionValue) : base(conditionFieldName)
+        {
+            conditionValues = new int[] { conditionValue };
+        }
+
+        public IntShowConditionalAttribute(string conditionFieldName, int[] conditionValues) : base(conditionFieldName)
+        {
+            this.conditionValues = conditionValues;
+        }
 
 #if UNITY_EDITOR
-    public override bool GetShowResult(SerializedProperty sourcePropertyValue)
-    {
-        bool isShow = false;
-        int comparingValue = 0;
-        if (sourcePropertyValue != null)
+        public override bool GetShowResult(SerializedProperty sourcePropertyValue)
         {
-            switch (sourcePropertyValue.propertyType)
+            bool isShow = false;
+            int comparingValue = 0;
+            if (sourcePropertyValue != null)
             {
-                case SerializedPropertyType.Integer:
-                    comparingValue = sourcePropertyValue.intValue;
+                switch (sourcePropertyValue.propertyType)
+                {
+                    case SerializedPropertyType.Integer:
+                        comparingValue = sourcePropertyValue.intValue;
+                        break;
+                }
+            }
+            foreach (int conditionValue in conditionValues)
+            {
+                if (comparingValue == conditionValue)
+                {
+                    isShow = true;
                     break;
+                }
             }
+            return isShow;
         }
-        foreach (int conditionValue in conditionValues)
-        {
-            if (comparingValue == conditionValue)
-            {
-                isShow = true;
-                break;
-            }
-        }
-        return isShow;
-    }
 #endif
+    }
 }

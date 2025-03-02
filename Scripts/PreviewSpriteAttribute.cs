@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 
-public class PreviewSpriteAttribute : PropertyAttribute
+namespace Insthync.UnityEditorUtils
 {
-    public int height { get; private set; }
-    public PreviewSpriteAttribute(int height = 100)
+    public class PreviewSpriteAttribute : PropertyAttribute
     {
-        this.height = height;
+        public int height { get; private set; }
+        public PreviewSpriteAttribute(int height = 100)
+        {
+            this.height = height;
+        }
     }
 }

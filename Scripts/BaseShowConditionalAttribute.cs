@@ -3,15 +3,18 @@
 using UnityEditor;
 #endif
 
-public abstract class BaseShowConditionalAttribute : PropertyAttribute
+namespace Insthync.UnityEditorUtils
 {
-    public string conditionFieldName { get; private set; }
-    public BaseShowConditionalAttribute(string conditionFieldName)
+    public abstract class BaseShowConditionalAttribute : PropertyAttribute
     {
-        this.conditionFieldName = conditionFieldName;
-    }
+        public string conditionFieldName { get; private set; }
+        public BaseShowConditionalAttribute(string conditionFieldName)
+        {
+            this.conditionFieldName = conditionFieldName;
+        }
 
 #if UNITY_EDITOR
-    public abstract bool GetShowResult(SerializedProperty property);
+        public abstract bool GetShowResult(SerializedProperty property);
 #endif
+    }
 }

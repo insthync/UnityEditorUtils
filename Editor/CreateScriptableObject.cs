@@ -8,63 +8,66 @@ using UnityEditor;
 using UnityEditor.ProjectWindowCallback;
 using UnityEngine;
 
-class EndNameEdit : EndNameEditAction
+namespace Insthync.UnityEditorUtils.Editor
 {
-    public override void Action(int instanceId, string pathName, string resourceFile)
+    class EndNameEdit : EndNameEditAction
     {
-        AssetDatabase.CreateAsset(EditorUtility.InstanceIDToObject(instanceId), AssetDatabase.GenerateUniqueAssetPath(pathName));
-    }
-}
-
-public class CreateScriptableObject : EditorWindow
-{
-    public static readonly HashSet<string> assemblyNames = new HashSet<string>() { "Assembly-CSharp" };
-
-    Vector2 _scrollViewPosition = Vector2.zero;
-
-    static List<Type> FindTypes(string name)
-    {
-        List<Type> types = new List<Type>();
-        try
+        public override void Action(int instanceId, string pathName, string resourceFile)
         {
-            // get project assembly
-            Assembly asm = Assembly.Load(new AssemblyName(name));
-
-            // filter out all the ScriptableObject types
-            foreach (Type type in asm.GetTypes())
-            {
-                if (type.IsSubclassOf(typeof(ScriptableObject)) && !type.IsAbstract)
-                    types.Add(type);
-            }
+            AssetDatabase.CreateAsset(EditorUtility.InstanceIDToObject(instanceId), AssetDatabase.GenerateUniqueAssetPath(pathName));
         }
-        catch { }
-
-        return types;
     }
 
-    void OnGUI()
+    public class CreateScriptableObject : EditorWindow
     {
-        GUILayout.Label("Select the type to create:");
-        _scrollViewPosition = EditorGUILayout.BeginScrollView(_scrollViewPosition, false, false);
-        foreach (string assemblyName in assemblyNames)
+        public static readonly HashSet<string> assemblyNames = new HashSet<string>() { "Assembly-CSharp" };
+
+        Vector2 _scrollViewPosition = Vector2.zero;
+
+        static List<Type> FindTypes(string name)
         {
-            foreach (Type type in FindTypes(assemblyName))
+            List<Type> types = new List<Type>();
+            try
             {
-                if (GUILayout.Button(type.FullName))
+                // get project assembly
+                Assembly asm = Assembly.Load(new AssemblyName(name));
+
+                // filter out all the ScriptableObject types
+                foreach (Type type in asm.GetTypes())
                 {
-                    // create the asset, select it, allow renaming, close
-                    ScriptableObject asset = CreateInstance(type);
-                    ProjectWindowUtil.StartNameEditingIfProjectWindowExists(asset.GetInstanceID(), CreateInstance<EndNameEdit>(), type.FullName + ".asset", AssetPreview.GetMiniThumbnail(asset), null);
-                    Close();
+                    if (type.IsSubclassOf(typeof(ScriptableObject)) && !type.IsAbstract)
+                        types.Add(type);
                 }
             }
-        }
-        EditorGUILayout.EndScrollView();
-    }
+            catch { }
 
-    [MenuItem("Assets/Create/ScriptableObject")]
-    public static void ShowWindow()
-    {
-        GetWindow<CreateScriptableObject>(true, "Create ScriptableObject").ShowPopup();
+            return types;
+        }
+
+        void OnGUI()
+        {
+            GUILayout.Label("Select the type to create:");
+            _scrollViewPosition = EditorGUILayout.BeginScrollView(_scrollViewPosition, false, false);
+            foreach (string assemblyName in assemblyNames)
+            {
+                foreach (Type type in FindTypes(assemblyName))
+                {
+                    if (GUILayout.Button(type.FullName))
+                    {
+                        // create the asset, select it, allow renaming, close
+                        ScriptableObject asset = CreateInstance(type);
+                        ProjectWindowUtil.StartNameEditingIfProjectWindowExists(asset.GetInstanceID(), CreateInstance<EndNameEdit>(), type.FullName + ".asset", AssetPreview.GetMiniThumbnail(asset), null);
+                        Close();
+                    }
+                }
+            }
+            EditorGUILayout.EndScrollView();
+        }
+
+        [MenuItem("Assets/Create/ScriptableObject")]
+        public static void ShowWindow()
+        {
+            GetWindow<CreateScriptableObject>(true, "Create ScriptableObject").ShowPopup();
+        }
     }
 }

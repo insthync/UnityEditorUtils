@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace UnityEditorUtils
+namespace Insthync.UnityEditorUtils.Editor
 {
     /// <summary>
     /// Modified from codes in Wiki: http://wiki.unity3d.com/index.php/FindMissingScripts 

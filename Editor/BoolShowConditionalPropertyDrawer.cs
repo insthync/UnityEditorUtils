@@ -1,8 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 
-[CustomPropertyDrawer(typeof(BoolShowConditionalAttribute))]
-public class BoolShowConditionalPropertyDrawer : BaseShowConditionalPropertyDrawer<BoolShowConditionalAttribute>
+namespace Insthync.UnityEditorUtils.Editor
 {
+    [CustomPropertyDrawer(typeof(BoolShowConditionalAttribute))]
+    public class BoolShowConditionalPropertyDrawer : BaseShowConditionalPropertyDrawer<BoolShowConditionalAttribute>
+    {
+    }
 }

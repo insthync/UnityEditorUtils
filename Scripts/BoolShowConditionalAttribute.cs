@@ -1,31 +1,32 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-public class BoolShowConditionalAttribute : BaseShowConditionalAttribute
+namespace Insthync.UnityEditorUtils
 {
-    public bool conditionValue { get; private set; }
-    public BoolShowConditionalAttribute(string conditionFieldName, bool conditionValue) : base(conditionFieldName)
+    public class BoolShowConditionalAttribute : BaseShowConditionalAttribute
     {
-        this.conditionValue = conditionValue;
-    }
+        public bool conditionValue { get; private set; }
+        public BoolShowConditionalAttribute(string conditionFieldName, bool conditionValue) : base(conditionFieldName)
+        {
+            this.conditionValue = conditionValue;
+        }
 
 #if UNITY_EDITOR
-    public override bool GetShowResult(SerializedProperty sourcePropertyValue)
-    {
-        bool isShow = false;
-        if (sourcePropertyValue != null)
+        public override bool GetShowResult(SerializedProperty sourcePropertyValue)
         {
-            switch (sourcePropertyValue.propertyType)
+            bool isShow = false;
+            if (sourcePropertyValue != null)
             {
-                case SerializedPropertyType.Boolean:
-                    isShow = sourcePropertyValue.boolValue == conditionValue;
-                    break;
+                switch (sourcePropertyValue.propertyType)
+                {
+                    case SerializedPropertyType.Boolean:
+                        isShow = sourcePropertyValue.boolValue == conditionValue;
+                        break;
+                }
             }
+            return isShow;
         }
-        return isShow;
-    }
 #endif
+    }
 }

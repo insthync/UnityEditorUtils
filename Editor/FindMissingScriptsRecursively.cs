@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-namespace UnityEditorUtils
+namespace Insthync.UnityEditorUtils.Editor
 {
     public class FindMissingScriptsRecursively : BaseFindMissingObjectsRecursively
     {

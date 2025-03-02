@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.UI;
 
-namespace UnityEditorUtils
+namespace Insthync.UnityEditorUtils.Editor
 {
     public class FindEmptyTexturesFromRawImagesRecursively : BaseFindMissingObjectsRecursively
     {

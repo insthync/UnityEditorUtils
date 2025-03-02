@@ -1,18 +1,21 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(UnityTag))]
-public class UnityTagPropertyDrawer : PropertyDrawer
+namespace Insthync.UnityEditorUtils.Editor
 {
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    [CustomPropertyDrawer(typeof(UnityTag))]
+    public class UnityTagPropertyDrawer : PropertyDrawer
     {
-        EditorGUI.BeginProperty(position, GUIContent.none, property);
-        SerializedProperty tag = property.FindPropertyRelative("tag");
-        position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
-        if (tag != null)
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            tag.stringValue = EditorGUI.TagField(position, tag.stringValue);
+            EditorGUI.BeginProperty(position, GUIContent.none, property);
+            SerializedProperty tag = property.FindPropertyRelative("tag");
+            position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+            if (tag != null)
+            {
+                tag.stringValue = EditorGUI.TagField(position, tag.stringValue);
+            }
+            EditorGUI.EndProperty();
         }
-        EditorGUI.EndProperty();
     }
 }

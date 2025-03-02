@@ -1,8 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 
-[CustomPropertyDrawer(typeof(StringShowConditionalAttribute))]
-public class StringShowConditionalPropertyDrawer : BaseShowConditionalPropertyDrawer<StringShowConditionalAttribute>
+namespace Insthync.UnityEditorUtils.Editor
 {
+    [CustomPropertyDrawer(typeof(StringShowConditionalAttribute))]
+    public class StringShowConditionalPropertyDrawer : BaseShowConditionalPropertyDrawer<StringShowConditionalAttribute>
+    {
+    }
 }

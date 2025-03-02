@@ -1,3 +1,6 @@
 ﻿using UnityEngine;
 
-public class ReadOnlyFieldAttribute : PropertyAttribute { }
+namespace Insthync.UnityEditorUtils
+{
+    public class ReadOnlyFieldAttribute : PropertyAttribute { }
+}
