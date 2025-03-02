@@ -1,25 +1,26 @@
-﻿using System;
-
-[Serializable]
-public class UnityHelpBox
+﻿namespace Insthync.UnityEditorUtils
 {
-    public enum Type
+    [System.Serializable]
+    public class UnityHelpBox
     {
-        None,
-        Info,
-        Warning,
-        Error
-    }
+        public enum Type
+        {
+            None,
+            Info,
+            Warning,
+            Error
+        }
 
-    [NonSerialized]
-    public string text;
+        [System.NonSerialized]
+        public string text;
 
-    [NonSerialized]
-    public Type type;
+        [System.NonSerialized]
+        public Type type;
 
-    public UnityHelpBox(string text, Type type = Type.Info)
-    {
-        this.text = text;
-        this.type = type;
+        public UnityHelpBox(string text, Type type = Type.Info)
+        {
+            this.text = text;
+            this.type = type;
+        }
     }
 }

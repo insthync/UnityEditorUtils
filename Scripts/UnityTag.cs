@@ -1,27 +1,30 @@
 ﻿using UnityEngine;
 
-[System.Serializable]
-public struct UnityTag
+namespace Insthync.UnityEditorUtils
 {
-    [SerializeField]
-    private string tag;
-    public string Tag
+    [System.Serializable]
+    public struct UnityTag
     {
-        get { return tag; }
-    }
+        [SerializeField]
+        private string tag;
+        public string Tag
+        {
+            get { return tag; }
+        }
 
-    public UnityTag(string tag)
-    {
-        this.tag = tag;
-    }
-    
-    public static implicit operator string(UnityTag unityTag)
-    {
-        return unityTag.Tag;
-    }
+        public UnityTag(string tag)
+        {
+            this.tag = tag;
+        }
 
-    public void Set(string tag)
-    {
-        this.tag = tag;
+        public static implicit operator string(UnityTag unityTag)
+        {
+            return unityTag.Tag;
+        }
+
+        public void Set(string tag)
+        {
+            this.tag = tag;
+        }
     }
 }
